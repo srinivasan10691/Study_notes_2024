@@ -1,0 +1,58 @@
+incremental backup  - check
+howmuch time it will take a complete cluster backup and how much time it will take to restore it - check
+what tool we have to use it has UI  --- check 
+ANy ip conflict we will have when we switching the datas from one cluster to to other cluster -- check
+
+
+
+
+Amazon EC2 --------
+Amazon S3  -----------
+Amazon VPC ------------
+AWS Lambda -------------
+Amazon CloudFront -----------
+AWS IAM --------------------
+EBS ------------------------
+EFS ----------------------
+Amazon Route 53 ---------------------
+cloudwatch ------------------
+AWS Secrets Manager -------------------
+AWS CloudTrail ----------------
+AWS WAF  ----------------------
+AWS Key Management Service  --------------------
+Amazon EC2 Auto Scaling ---------------------
+Loadbalancer _----------------------------
+EKS ----------------------------
+ECR---------------------------------
+ECS----------------------------------
+RAM (resource access memory)
+RDS (DB)
+Transitgateway
+
+
+
+How will you login to your ec2 instance with your AD credentials 
+
+
+Amazon RDS
+Amazon DynamoDB
+AWS CloudFormation
+AWS Elastic Beanstalk 
+Amazon ElastiCache
+code commit, code pipeline
+##############################################################################
+CROSS
+integrate our AD for login with aws account
+subnet means what
+how many services are used in your microservice 
+s3 bucket replication, if object is encrypted with kms , then how it is replicated in other bucket and how it can be accessed.
+inline  policy 
+ACM, --- aws certificate manager
+
+moving the snapshot or s3 bucket objects , if its encrypted what the process we have to follow. 
+s3 mount for Linux s3fs
+
+
+Skill Up With Stan ------ channel name 
+
+
