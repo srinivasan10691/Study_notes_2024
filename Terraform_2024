@@ -1,14 +1,12 @@
 OCT -12
 
-TERRAFORM:          --- GO language
+TERRAFORM:                 --- GO language
 
 Install Git bash --> choose the option add the git bash to the windows terminal
 Download visual studio code
 install the terraform
 Install the terraform extention in visual studio . --- hasicorp terraform
 
-
-The Access Key ID is unique to the AWS account and identifies which account the IAM user belongs to. AWS uses this ID to determine:
 
 Creation s3 bucket using terraform :
 *****************************************
@@ -150,7 +148,8 @@ Resources will have two king of dependencies --> implicit and explicit
 Firstly terraform find which has no dependencies and will execute that first   and then one by one it will execute by oder 
 Input of resource is argument and output of resource is arguments
 
-Implicit dependency : Using attributes of one resource as input then it is implict dependency  
+Implicit dependency : Using attributes of one resource as input then it is implict dependenc
+y  
 Explicit dependency : explict dependency is used by ourself for customizing the order of creation like ,after creating first subnet then we want to create the second one .  but it is not depend on each other eventhough we creating the dependency for one after one creation. 
 
 
@@ -771,17 +770,63 @@ once done check whether that resources has been removed from state file by using
 
 ################################################################################################################SSS
 
-Since there is cloudformation , azure template, and other IAC code why terraform
+TerrAform push and pull:
 
-all these template are specific to their tool, but terraform where we can use our code for all the platform like aws, azure and other things, just we have to mention the provider. 
+Terraform state pull :  This is used to download the state file information from the remote state ( that is this will display what are the information in the remote state file, in the screen itslef ) we can save it in file if we want.
+we can use this as backup also, taking backup of statefile using this command
 
-terraform init will configure the backend and ensure it is initialized
-terraform init downloads and installs the necessary provider plugins for the services you are using in your Terraform configuration files
-Terraform uses providers to interact with different cloud platforms and services.Providers are essentially plugins that tell Terraform how to interact with APIs of various infrastructure services.
+terraform state pull > backupfile   -> which will take the state file as backup
 
-Terraform plan : whish is like dry run, which is going to tell what are the resources you are going to create like that , but it will not create as i SAID IT is dry run things.
+Terraform state push : now our tfstate file is in local , now we decided to move that to s3 to make it as remote. In that case we can use terraform statepush .
 
-lifecycle --  init - plan - apply --destroy
+shortly - its used to manually upload a local state file to remote state.
+
+Terraform force-unlock -> manually unlock the state file which is in remote (which is saved in s3 as backend)
+
+Terraform state list  -> It will list down what are all the resources we created
+
+Terraform state mv  -> we can use this command to reame the resource name. for example
+resource "aws_vpc" "myvpc"    -- in this we need to change the myvpc afterall this is name which we calling inside the tf file, so if we change this name in our terraform file and check the terraform plan, it will say that it will remove the vpc and recreate this again. But we changed only the name . So to overcome this we can change the resource name directly in the state file instead of going through terraform file. We can use "terraform state mv resourcename newresourcename"  before please check the resource name in terraform sate list. 
+
+Terraform sate rm  ->  we can use  this command to remove any resources in the state file . list the state fille first and choose the one which you want to remove by using the above command
+
+Terraform show -> it is same as cat tfstate file . it will be in json format. so if we use terraform show it will be showing the resources that we created in easy format. 
+
+###########################################################################
+terraform secrets :
+
+ Scretes can be stored in aws secrets . using aws secrets we can store the passwords and that can be used in terraform
+ create secrets in aws and save your passwords. once done using data resource we can fetch the secrets in terrafrom (using secret id (name of our secret))
+ once fetched using locals we can save our passwords and then we can call them wherever its required.
+
+in aws secret we save username and password with the secret name db-cred
+
+ 
+data "aws_secretsmanager_secret_version" "credentials" {
+   secret_id = "db-cred"                     ------ name of the secret that we created
+}
+
+locals {
+  db_cred = jsondecode(
+   data.aws_secretsmanager_secret_version.credentials.secret_string
+  )
+}
+
+resource "aws_db_instance" "dbinstance"{
+------
+-----
+-----
+username = local.db_cred.username
+password = local.db_cred.password
+
+#########################################################################################################
+
+
+
+
+
+
+
 
 
 
