@@ -21,7 +21,7 @@ MFA for deleting the object. which will protect from other person deleting the o
 Below are the features that we paying for s3 while using
 
 # storage  per gig
-#Request and data retrievel 
+#Request and data retrieval 
 Data transfer
 Management and replication 
 
@@ -119,7 +119,7 @@ s3 objects and bucket can be encrypted by three ways
 
 * Server side encryption with customer provided key --- where we can create our own key using openssl and while upload the data in s3 we have to pass the key along with the data. so using this key the s3 will encrypt the data and store it in the bucket and it will clear the key which is sent to s3 for encryption. so s3 only have the data which is encrypted. so when we have to download the data we have to pass the key with the command for download the object, then it will automatically encrypt the data and it will be downloaded in our path.  this is more more secure then the other two kms option that given above. 
 
-DSSE-KMS   -  combines two layers of encryption  ( this is for only objects) not for bucket
+DSSE-KMS   -  combines two layers of encryption  ( this is for only objects) not for bucket.
 
 S3 Managed Encryption (SSE-S3): The first layer uses the default Amazon S3 encryption, which encrypts the data on disk with AES-256 (Advanced Encryption Standard).
 AWS KMS (Key Management Service): The second layer uses AWS KMS keys (either AWS-managed keys or customer-managed keys) to encrypt the encryption keys used for SSE-S3 encryption.
@@ -764,7 +764,7 @@ EBS volumes and snapshots
 Ec2 instance and volume should be in same availablity zone .
 
 Create a instance with 4 different EBS volume (except provisoned iops)
-To extend the volume we have to click action and modify volume and enter the size that we need , and then we have to login to the server and extend it the volume that we create newly-allocated space
+To extend the volume we have to click action and modify volume and enter the size that we need , and then we have to login to the server and extend it the volume that we create newly-allocated space.
 
 two commands to extend the added space
 
@@ -790,7 +790,8 @@ xfs_growfs -d /   -- once this command executed now root partition has the extra
 
 We can also change the EBS volume type from gp2 to io1 in the modify volume option , no need to stop the instance or anything 
 
-Moving EBS from one region to another  ( we are  using root volume to do this )
+Creating IMAGE FROM EBS snapshot:  
+
 Choose the volume and -> action -> create snapshot  (snapshot created succefully , it is nothing but complete copy of your volume) snapshots exits on s3 . 
 We can look on the snapshot module to check the snapshot that we created
 Once created snapshot , again choose the snapshot and click action and choose "Create image from EBS snapshot"  in that we have to choose the virtualization type "hardware-assisted virtualization" . and click create . once created then we can able to use that image to create a new Ec2 instance
@@ -814,6 +815,12 @@ By doing this way we can move our ec2 instance from one region to other region b
 EBS Snapshot: Focuses on the data stored on the volume(s). It's a good way to backup or replicate storage.
 AMI Creation (Direct Snapshot of EC2): Captures the entire instance including both data and metadata, making it ideal for cloning or scaling EC2 instances.
 By using an AMI, you are essentially creating a complete template of your EC2 instance, including both the operating system and application setup, while an EBS snapshot is a backup of the volume data only.
+
+EBS SNAPSHOT convertion ami will not contain "Other attached EBS data volumes and Instance configuration like IAM roles, user data scripts, etc. and Instance metadata (like security groups, key pairs, instance type, networking config)) and also userdata scripts
+
+but EC2 instance convertion ami will have all , exact clone of that instance .
+
+
 
 ***********************************************************************************************************************************************************************
 Moving EBS from one AZ to other AZ --> take snapshot --> from snapshot create volume  create the volume in the zone that you needed -- but in this we cant move to one region to other region
@@ -941,9 +948,9 @@ Cloud Watch:  it will watch performance
 
 we can use cloud watch for - > ec2 instance, autoscaling groups, ELB , Route 53 healthccheck , EBS volumes , cloud front 
 
-IN EC2 instance it will monitor host level metrics like CPU , RAM , Network, DISK, status check.
+IN EC2 instance it will monitor host level metrics like CPU  , Network, DISK, status check.
 
-It is used to monitor our AWS resources as well as the application that runs on AWS  ( cpu ram network , volumes etc)
+It is used to monitor our AWS resources as well as the application that runs on AWS  ( cpu \ network , volumes etc)
 
 Cloud trail:   It will monitor the API calls in the Aws platform  ( aws console actions and API calls that made in console ) 
 
@@ -994,6 +1001,21 @@ You write queries to filter and aggregate the data from your logs. This can help
 
 Example:
 Let’s say you have logs from an application that records HTTP requests, and you want to analyze errors (e.g., HTTP status code 500). You could run a query in CloudWatch Logs Insights to search for all logs where the status code equals 500, to find out when and why the errors happened.
+
+
+Note : Cloud watch will not monitor the memory usage in the ec2 instance natively. we have to install the cloudwatch agent in the ec2 instance where we need to monitor the memory usage .
+
+why memory usage is not monitored by cloudwatch by default like cpu and other resources
+
+
+CPU: The hypervisor controls CPU scheduling and usage across all instances on the physical server, so it can easily track CPU usage.
+Disk I/O and Network I/O: These are managed by the hypervisor because they involve shared hardware resources.
+Memory Usage: Managed entirely by the operating system running on the EC2 instance, so the hypervisor cannot track it without OS-level access.
+
+so memory usage can be track only if we have os level access. where cloudwatch cannot access the ec2 whithout any permission from the user level . so we have to manually instal the agent inside the ec2 instance to monitor the cloudwatch
+
+The hypervisor in awss can directly mangages the cpu resources, but not the memory. once memory is allocted to the ec2 instace the memory level resources can be access by ec2 only. not by hypervisor. thats why it cannot be monitored we have to install the agent.
+
 ####################################################################
 Cloud watch LAB :
 
@@ -1775,7 +1797,9 @@ Cname -> Canonical name -> which can be used as another domain name . one IP has
 
 Elb do not have pre-defined ipv4 address, you resolve them using a dns name
 
-We can also buy domain name directly with AWS . itt will take upto 3 days to reflect . mostly will be done within a hour or 2 hour
+We can also buy domain name directly with AWS . itt will take upto 3 days to reflect . mostly will be done within a hour or 2 hour.
+
+An alias record is a Route 53-specific DNS record that allows you to route traffic directly to an AWS resource, such as an ELB, CloudFront distribution, or S3 bucket.
 
 @@@@@@@@@@@@@@@@@@@@@@@
 
@@ -2154,6 +2178,19 @@ Normally if we didnt use the global accelerater the request will pass through ea
 
 Now we get global acceelerator end point. Using that enpoint we can access our serivices or application . Global acclertor will provide two static IP address , where we can give that to client end for whitelisting the IPS . 
 
+
+ROUTE 53 latency based routing vs global accelerator 
+
+Example Scenario:
+You have an application running in US-East (Region 1) and EU-West (Region 2).
+Route 53 is configured with latency-based routing to route US users to Region 1 and EU users to Region 2.
+If an issue occurs in Region 1, and the ALB becomes unhealthy, Route 53 will detect the failure via health checks.
+Route 53 will start rerouting traffic to Region 2.
+However, DNS caches and propagation delays mean that users who have cached the old IP address may still be routed to the unhealthy Region 1 until their DNS cache expires.
+Once the cache expires, they will start getting the updated IP address for Region 2, and the traffic will flow there.
+
+but this is not the case of Global accelerator , we have two static ip , when user its the ip , the global accelrater itself find the best path and route the traffic to nearest location. so if one region is not available it will auto route to another region. so there will be very fast routing process and downtime will not be  there. but route 53 changes effect will take some time to propagate and also browser from client side some time uses the same IP resolution which is poiting to unavailable region that became downtime. until the ttl value expries the browser will send the reqest to same IP which is unavailable. 
+
 #####################################################################
 VPC endpoint:
 ******************
@@ -2231,6 +2268,31 @@ IF we need to connect the rds from another account means, go the enpoint service
 
 its not like that if we have enpoint service na, we can give request to the endpoint service to create a connection, before that we have to mention the account ID in the allow principle tab, then only it can able to give the request to endpoint service and then only the endpoint service can access the request. 
 
+
+Use Endpoint Services if you’re hosting a custom application or API for private consumption.
+Use Interface Endpoints to consume AWS-managed services or custom Endpoint Services.
+Both rely on AWS PrivateLink for secure, private communication.
+
+Clear explanation :
+
+VPC endpoint has two types
+
+gateway enpoint : A gateway that connects your VPC privately to specific AWS services like S3 and DynamoDB.
+interface endpoint : A private network interface (Elastic Network Interface) in your VPC that connects to AWS services or custome services ( using endpoint service)
+
+interface endpoint is from consumer side configuration , who is going to access the resources from producer end.  producer end will be endpoint service or any other aws services . 
+so using interface endpoint only we goint to access the resource or services from the other side.
+
+example:
+
+VPC A and VPC B , in VPC B we create a DB and connected with NLB and NLB is associated with the endpoint service . So now from VPC A  they need to connect with this endpoint service in the secure way.
+
+So in the vpc A we have to create a interface endpoint and then attach the endpoint service (which is created in vpc b).  so ink VPC A if ec2 instance have to access the db means , it should hit the interface endpoint ( which has the dns name like servicename.dns.fhafosdhfahd.amazon ) so the ec2 has to hit this dns name , so it will directly hit the endpoint service via interface endpoint and get the result.
+
+This interface endpoint has private ip , so once we hit this dns name "servicename.dns.fhafosdhfahd.amazon" for accessing the db , it will resolve to that PRivate IP and then it will hit the endpoint service and get the output.  so we cant directly hit the endpoint service . if we need to access the enpoint service then it should be go through the interface endpoint. so we have to hit the interface endpoint , that will connect to endpoint service ..  so one interface endpoint can be configured with only one endpoint service or other aws services. 
+
+IN this private link is nothing but it is a technology enabling private communication over Interface Endpoints. using this technology only the above senories are working. 
+
 ########################################################################################
 Aws Transit gateway  (simplify the netwrok architecture topology)
 **********************
@@ -2238,11 +2300,110 @@ Aws Transit gateway  (simplify the netwrok architecture topology)
 Allows you to have transitive peering between thousands of VPC and on premises data centers, it will work has hub.
 
 #######################################################################################
-AWS VPN cloud Hub:
-*****************
-If you have mulitiple different sites, each with its own vpn connections, you can use AWS VPN cloud hub to connect those sites together . IT is like HUB model
+AWS VPN endpoint ( connect our aws vpc from any where using the VPN Client (user can use this)
+**************** 
+two type of authorization mode
+
+identiy based
+certificate based
+
+Ussing Identiy based, using simplead mode we using now. 
+
+1) create directory service 
+
+just go to directory service, choose the simple AD
+create a directory dns name -- srinnivasantech.org
+set the administrative password
+
+once done, choose the VPC -- srinivpc (where our ec2 are placed)
+now the directory service is created, which is used for authentication our VPN using VPN client
+
+2) create certificate and upload to ACM
+
+Now create a certificate for the vpn using ECRSA command in Linux server and upload the file in aws certificate manager.  once we create certificate we will get server.crt , server.key, ca.crt , client.crt, client.key
+
+in the above keys we going to upload the server.crt and server.key and ca.crt to the ACM
+
+using cmd, aws acm import-certificate --certificate fileb://pki/issued/server.crt --private-key fileb://pki/private/server.key --certificate-chain fileb://pki/ca.crt --profile admin-genral( this is the profile that we created by access key and secret key)
+
+create the certificate in the same region where your vpc is located. 
+
+3) create vpn endpoints
+
+Now go to client vpn endpoints, and create a vpn endpoints and in that it will ask for cidr ip  just give anything between /12 or /22  subnet. will discuss below why this is used exactly. and then it willask for certification choose the certificate that we imported and then choose user-based authentication. there will be two type one is user-based and other one is mutual authentication(certificate based aauth). so once we choose the user-based authentication and then choose the active directory that we created
+
+then it will ask for dns address (which is used for resolivng the quueirs when client request ) so go and check the activie directory we created it will have 2 dns ip address copy and paste that in the field.  and then choose the vpc where we need to connect our client . nd then we can choose the timeout session like 24 hours or 12 hours to disconnect the vpn session 
+
+once done the vpn is created, but it wil in pending state, we have to associate the subnet that in vpc which we choose. any subnet we can choose only one subnet can be choosed from on AZ.  once done the vpn will be in available state . and then download the client configuration file which need to be attach int he vpn client software.
+
+the last thing is we have to add the authorize rule which is authorize the client like which cidr range that the client can access from the vpc . lets say we have vpc with cidr 10.0.0.0/16
+and we have public subnet and private subnet with below cidr range
+Private Subnet: 10.0.1.0/24 (application servers).
+Public Subnet: 10.0.2.0/24 (bastion hosts).
+
+lets say VPN User Groups:
+Developers.
+Admins.
+
+
+We can set like 
+
+Authorization Rules:
+Developers:
+
+Destination CIDR: 10.0.1.0/24.
+Access: Only developers can access the application server subnet.
+Admins:
+
+Destination CIDR: 10.0.2.0/24.
+Access: Only admins can access the bastion hosts.
+
+or we can give the full vpc cidr which can able to access all the subnet. 
+
+CLIENT SIDE: finally
+
+now download the vpn client and install it , and open the software and upload the configuration file and then give the uername and password which we created in directory service. and then access the vpc network. 
+
+
+in the above details I have mention some CIDR while creating the VPN , why its used. 
+The Client IPv4 CIDR in a VPN setup is used to assign IP addresses to the VPN clients when they connect to the VPN. These IPs are virtual addresses that the clients will use while communicating with your AWS VPC or on-premises resources over the VPN.
+
 
 ###################################################################
+SITE-to-Site VPN connection 
+
+SITE-SITE VPN connection ( on-premisis data center -> aws)
+
+From the AWS side we have a vpc with Virtual private gateway where our traffic will flow through the virtual private gateway instead of IGW. Customer gateway device is nothing but the router from the on-premisis . using the these we going to connect our on-premisis dc to aws 
+
+The first step is to create a Customer gateway in the aws ( which is representing the client customer gateway )  go to customer gateway and create customer gateway it will ask for public IP addresss just enter our on-premesis customer gateway IP address ( which is router ) once done click create. that's it  customer gateway is created with the public IP from the client side 
+
+the second thing is create Virtual private gateway and then attach to the VPC which we have to connect with . 
+
+Now create a site-site vpn connection - enter the name of this vpn connection , it will ask for the target connection --> choose the Virtual private gateway that we created and there will be another option also we can choose the  transist gateway instead of virtual private gateway if needed. In our case now we using VPG so wechoosed that. and then it will ask for customer gateway --> choose the customer gateway that we created --> and then it will ask for routing option 1) dynamaic (requires BGP) 2) static. so choose the static one and enter the CIDR range of our client environment (on-prem). aand there is also tunnel option (if needed we can configure it) . so once done it will create on vpn connection . You can check the vpn connection that we created it will have 2 tunnel which will be defualty created , that is for fault tolerance if one is failed another one can be in active. but both are currently down. we have to make them up . 
+
+Once everything done, download the configuration file which will be in the page we created the vpn connection.  when we click the download configuration file it will ask for gateway device name ( strongswarn) and choose in which os we going to install, so based on this configuration file will be downloaded.
+
+Go to the client side and install the strongswarn (its like checkpoint . check the flow and how its working) . once installed , we have to do some configuration setup for this software , so these steps also provided by the aws,  these configuraton settings will be clearly explained in the above configuaration file which we downloaded. so just edit the configuration settings in the strongwarn as explained in that configuration file (simple just we have to follow the steps that given in the configuration file to make the tunnels up ) in that configuration file also there is tunnel settings. so once everything is done we can see 2 interface will be available in ifconfig . and also go and check the vpn connection , both the tunnels will be up ( which is down before) . now everything is set up 
+
+Now go and create an ec2 instance in the vpc in the private subnet . and then go to the route table and mention the destination as  CIDR of on-premis  and target as virtual private gateway which we created and save it . 	so all the traffic that are destinated to the cidr (that we mentioned) will go through the VPG. 
+now go to your datacenter and try to ping your ec2 instance private IP we can get the response .
+
+##############################################################################
+diff between vpn endpoint and site-site vpn connection
+
+Use Cases
+Site-to-Site VPN Example Use Case
+Scenario:
+A company has an on-premises data center with its own network (e.g., 192.168.1.0/24) and needs to access AWS-hosted applications in a VPC (e.g., 10.0.0.0/16).
+
+
+VPN Endpoint Example Use Case
+Scenario:
+A company has developers working remotely from various locations. They need secure access to the company's resources in AWS VPC (e.g., 10.0.1.0/24) without exposing resources to the public internet.
+
+
+########################################################################################
 
 AWS network costs:
 
@@ -2313,6 +2474,12 @@ Lanch 2 different instances with two different region with webserver installed (
 
 Create a load balancer : create a LB with classic LB. name:myclassicELB and choose the default VPC and choose the listner port 80 and use the security grup as same as we used for app server. and then configure health check and then we have to add the EC2 instances and now LB is created. There is no IP address for ELB only DNS name for ELB.  and also check instance are "in service" once LB created it will take time to show this status in healthcheck.Now check the site using DNS NAME . Now stop one instance and check the LB will take out the app server from LB .
 
+General:
+
+you cannot add EC2 instances from different regions to the same target group for a load balancer in AWS. Target groups are specific to a single region, and all instances in the target group must be in the same region as the load balancer1.
+
+If you need to distribute traffic across instances in different regions, you would need to set up separate load balancers in each region, each with its own target group. Then, you can use Route 53 or another DNS service to manage traffic distribution between these load balancers.
+
 
 Now we going to check with Application lB
 *******************************************
@@ -2323,9 +2490,143 @@ Advanced load balancer theory:
 *****************************
  Sticky sessions : this will enable your users to stick to the same EC2 instance. Can be usefull if you are storing information locally to that specific instance . For eg : IF you have two ec2 instances both are sharing equal request. If you enable sticky session on one specific EC2 instance then traffic will not send to that EC2 instance. Only the User which  you bind to that EC2 can send the request to that EC2 instance . Others will be sent to the second ec2 instance.  IN exam they will ask you are not receiving any traffic to an single instance(sticky enabled ) in that case we have to disable the sticky sessions on that server. 
 
+How It Works in Practice:
+Login Request:
+
+A user logs into the e-commerce website.
+The request is routed to EC2-1 by the load balancer.
+EC2-1 processes the request, generates a session ID, and sends it back A session token (e.g., session_abc123) to the user via a cookie in the HTTP response..so for the further request user will add the session token/cookie along with the request so the ALB will check the cookie and send the request to the ec2-1 
+
+Browsing and Adding to Cart:
+
+Subsequent requests from the user (e.g., browsing products, adding items to the cart) are routed to EC2-1 because of sticky sessions.
+EC2-1 keeps track of the user’s shopping cart and session details locally.
+Checkout:
+
+When the user checks out, the request is also sent to EC2-1, ensuring the cart data and session state remain consistent.
+What Happens if the EC2 Instance Fails?
+If EC2-1 becomes unhealthy:
+The load balancer detects this via health checks and stops routing traffic to EC2-1.
+The user’s next request is routed to a different EC2 server (e.g., EC2-2).
+Without a centralized session store: The session data on EC2-1 is lost, and the user may need to log in again or lose their cart data.
+With a centralized session store (e.g., Redis): EC2-2 retrieves the session data from the centralized store, allowing the user to continue seamlessly.
+
+like: The EC2 instance (e.g., EC2-2) receiving the request extracts the session ID (session_abc123) from the cookie. and EC2-2 queries the centralized session store (Redis/DynamoDB/RDS) using the session ID.
+
+
 Cross zone load balancing : This enables you to load balance across the multiple availablity zones. For eg. In one availablity zone we have 4 instance with LB which can send the traffic equally . IN other Availablity zone we have only two ec2 instance with LB which also shares the equal traffic to them (both availablity zones are created for single site ). Incase if the second availablity zone cant handle the traffic due to overload what is the fix for this.  Cross zone load balancing will help us to share the traffic from one zone (2 instance) to the other Availablity zone LB(which has 4 instance). 
 
 Path Patterns : This allows you to direct traffic to diferent EC2 instances based on the URL contained in the request. For eg : IF any request comes like www.tinyurl.com then it will goes to the first availablity zone(which has 4 instance) and if any request which comes like www.tinyurl.com/images/ then it will goes to the second availablity zones which has two instance. We can configure in that way like any request to access the images content will send the request to that particular instance. 
+
+
+
+we have domain facebook.com and which points to our ALB . genrally in the route table we cant create the A record since the ALB will not provide IP address it will provide only the DNS name so we cant enter the IP for the a record. So we will create alias in the route 53 and point our domain facebook.com with the ALB dns name. Alais will accept the dns name. so this is the process . 
+
+Question is , when the user try to resolve the facebbook.com the route 53 will check and say like the facebook.com dont have Ip and it has dns name and it will forward the dns name to the user. again the user will query the dns name sperately to the aws DNS and then aws dns will provide the IP of the LB. ALB has different public IP which is managed by aws. so aws will resolve the IP and again it will forward the right IP to the user and user gets the ip and it will give the page. 
+
+ALB has different public IP which will be belongs to each availability zone where we configured. While we configuring the ALB we will chose 2 different AZ and each AZ has to be connected with one subnet. so while configuring we have to give these details. so the LB has unique IP for each subnet in the AZ. NOte only one subnet can be associated with the AZ while configuring the LB. We can have multiple subnet in the Az but while configuring only one is allowed to be attached in the LB. the same way we have mulitiple az in the region , so we can choose atleast 2 AZ while creating the LB for fault tolrence.  SO that LB will be deployed on all the AZ where ever we choosed in the configuration. 
+
+Visualization of the Process:
+Step 1: User enters facebook.com.
+
+Step 2: Browser sends DNS query to DNS resolver.
+
+Step 3: DNS resolver queries Route 53 for facebook.com.
+
+Step 4: Route 53 responds with my-loadbalancer-1234567890.us-east-1.elb.amazonaws.com.
+
+Step 5: DNS resolver queries AWS DNS for my-loadbalancer-1234567890.us-east-1.elb.amazonaws.com.
+
+Step 6: AWS DNS responds with the IP addresses of the ALB.
+
+Step 7: DNS resolver returns one of the IP addresses to the browser.
+
+Step 8: Browser connects to the ALB using the IP address.
+
+The public IP addresses of an Application Load Balancer (ALB) are not static and are managed by AWS, which means they can change and that will be updated in the dns by itself which is managed by aws. 
+
+To see the current IP addresses, you’ll still need to use a command-line tool like nslookup or dig
+
+
+
+Usually when the public IP got by the user , it will go through the IGW , and IGW check the route table and it will forward the traffic according to the route table. but in the ALB case it is not like that. since we dont configured the public IP of the ALB in the route table how come the IGW knows where to route the traffic. below is the process for this question . once the IGW gets the public IP of the ALB it will directly route the traffic to AWS internal infrastructe route. so that will have the right path to reach the destination
+
+User Request: User requests my-loadbalancer-1234567890.us-east-1.elb.amazonaws.com.
+
+DNS Resolution: DNS service returns public IP 52.86.22.1.
+
+IGW Routing: IGW forwards the traffic to 52.86.22.1.
+
+AWS Routing: AWS’s internal infrastructure routes the request to the appropriate ALB instance in one of the specified subnets.
+
+
+
+TRAFFIC FLOW WITHOUT THE LB
+
+
+Instance Configuration:
+
+Private IP: 10.0.0.5
+
+Public IP: 203.0.113.10
+
+Outbound Request:
+
+Instance 10.0.0.5 sends a request to the internet.
+
+IGW translates the private IP (10.0.0.5) to the public IP (203.0.113.10).
+
+Traffic reaches the internet with 203.0.113.10 as the source IP.
+
+Inbound Request:
+
+External user sends a request to 203.0.113.10.
+
+IGW receives the request and translates the public IP (203.0.113.10) to the private IP (10.0.0.5).
+
+Traffic is routed within the VPC to the instance 10.0.0.5.
+
+
+***************************************************************
+ALB -> target instance  complete flow
+
+Once user hit the ALB , DNS will provide the public IP to the user (50.0.0.1) which is belongs to ALB . (note: ALB will have multiple public IP  associated , according to the AZ that are attached. If the ALB is attached with 2 AZ then it wil have two public IP and two private IP . Each AZ will have one public and one private IP . but these are not exposed to the user because it will provide only dns. Aws give only dns name to the user not the public IP of the ALB because those are not static it is dynamic and maintained by aws infrastructure.) so once the request enters the IGW . this IGW will do NAT , like it got the public ip of that ALB right, it will convert it into the private ip ( which is already linked and saved in the aws infra , already this public IP will be linked to private ip as I said above each AZ have one public and one private right, so that public IP will be linked to that Private  IP )
+
+ONE AZ - public ip --- link --- private IP same as another AZ . if you want you want to check the public ip and private ip of that ALB means go to network interface which will be in EC2 dashboard and where you can see the private ip and public ip of the ALB in each AZ. 
+the private IP will be in the created from the subnet that we associated in the each az. 
+
+so once the IGW convert that public IP to private IP , then it will check the  route table and forward the packet to the right subnet and then it will reach the ALB. once ALB get the request it will check the listner and according to the port mention in the listerner it will forward the traffic to the target group. 
+
+once the ec2 process the request it will give the reponse to the LB and LB forward the request to IGW , again IGW convert the private ip of that LB to public IP and then send back to the user. 
+
+
+CROSS ZONE LOAD BALANCING -there is an option is alb and nlb where we can enable this or disable this. by default it will be enabled in alb.
+
+With cross-zone load balancing enabled, the traffic is routed to the EC2 instances across both AZs according to the number of EC2 instances. In your case:
+
+25% of the traffic will go to AZ-1 (because it has 2 EC2s out of 8).
+75% of the traffic will go to AZ-2 (because it has 6 EC2s out of 8).
+This ensures balanced traffic distribution based on the number of targets, regardless of which AZ the request originates from.
+
+##########################################################################
+three-tier architecture -
+
+
+User (Frontend): User interacts with the application.
+Frontend (Presentation): Sends requests to the backend, displays data to the user.
+Backend (Application): Processes requests, performs business logic, and communicates with the database.
+Database (Data): Stores and retrieves the necessary data.
+
+
+Frontend: When you visit the homepage, you are interacting with the frontend. It loads product data, provides interactive buttons, and handles user actions like searching, filtering, and adding products to the cart.
+Backend: When you add a product to the cart or place an order, the backend handles the logic (e.g., checking stock, calculating prices, processing payments).
+Database: The backend interacts with the database to fetch product details, update inventory, and store your order information.
+
+so in this frontend servers maya use the internet facing LB,  and the backend servers can use the internal facing lb, which is not exposed to the outside of the vpc.. so when the user need some data  it will first hit the Internet facing LB, which is frontend. and then frontend server will commnunicate with backend servers to fetch the details with some business logic. so these backend servers are in internal facing LB. so the frontend will call the internal facing LB to communication with the backend server to get the details, the backend will then communication with db and give the result to frontend. 
+
+
+
+
 
 ###########################################################
 Autoscaling : There are different types of scalling options
@@ -2400,6 +2701,62 @@ SNS: Simple notification service . SEnd notification from the cloud
 It is used to publish messasges from an application and immediately deliver them to subscribers or other applications.
 SQS - simple queue service 
 Both sns and sqs are messaging service in aws. SNS - push ( push the information) and sqs - pull ( we can pull the information )
+
+publish the messages to millions of customers (10 millions)  in the form of (email, http endpoint, SQS , texting ), its fully managed service and auto scaling. it consist of topic and subscription . we can use that for "application to person" and aalso for "application to application"
+
+Appllication to person : from topic we can send the messages to multiple customers and also we can choose single customer also for sending the messages
+Applicaation to application: from topic it can send to lamda for processing the message and save it to db , and also it can send it to sqs which can be used by other application for processing 
+
+Create SNS topic --> name  --> encryption --> access policy ( who can publish the topic and who can subscribe the topic)  -> retry policy --> delivery status logging
+
+ONce topic is created we have to create a subcrition --> choose the topic(arn) where you need to attach the subscription -> protocal (sms, email, sqs ..etc) --> subscription filter policy (anything you want to filter like only the topic which are in www  have to send the topic to the subscriber like that)  -- redrive policy( dead-letter queue)  ( this is we can enable or disable  and  this is used for storing the undelivered messages so that we can resend them again whenever its needed. SO These messages can be saved in the sqs queue)
+
+once subscription is created . we can publish the messasge directly from the console or else if application need to publish the message means we have to configure the sdk for aws sns in the application and using the arn of our topic we can publish the message from the application so that it will deliver it to subscribers. 
+
+
+Step-by-Step Flow: EC2 Auto Scaling Alerts with SNS
+1️⃣ EC2 Launch/Terminate Event Occurs
+Suppose an EC2 instance is launched or terminated inside an Auto Scaling Group (ASG).
+2️⃣ CloudWatch/EventBridge Detects the Change
+AWS CloudWatch detects the event and forwards it to an SNS topic.
+3️⃣ SNS Publishes the Event to All Subscribers
+SNS receives the event and sends a notification to all subscribers (Email, Lambda, SQS, etc.).
+
+
+How to Set Up SNS for EC2 Launch/Terminate Alerts
+✅ Step 1: Create an SNS Topic
+Go to AWS SNS → Create a Topic (e.g., EC2-Scaling-Alerts).
+Choose Standard Topic.
+Copy the Topic ARN (e.g., arn:aws:sns:us-east-1:123456789012:EC2-Scaling-Alerts).
+✅ Step 2: Add Subscribers
+Go to the SNS topic → Click Create Subscription.
+Choose Protocol (Email, Lambda, SQS, etc.).
+Enter the Subscriber Endpoint (e.g., your email, Lambda function, or SQS queue).
+Confirm the email subscription if using email.
+✅ Step 3: Create a CloudWatch Rule to Trigger SNS
+Go to AWS CloudWatch → Click Rules → Create Rule.
+Select Event Source → Event Pattern.
+Choose AWS Service: EC2, and Event Type: EC2 Instance State-change Notification.
+Select the event types:
+Running (when EC2 launches).
+Terminated (when EC2 shuts down).
+Set Target as SNS and select your SNS Topic (EC2-Scaling-Alerts).
+✅ Now, whenever an EC2 instance launches or terminates, an alert will be sent to SNS subscribers!
+
+
+FOR HIGH CPU USAGE OR RAM USAGE
+
+cloudwatch sends notification to sns topic , sns receive the messages and send the message to sqs. sqs store the messages in the separate que ( we have to create a separate que for highcpualerts)  . once new messages stored in the sqs queue, lambda automatically polls the messages from the queue and sort out and fix the iissues according to the function we written in the lamda code.  question is how lamda knows the sqs as a new message?  AWS invokes Lambda when new messages arrive in SQS  . we have to set some setting accordingly in the lamda 
+
+✅ Option 1: AWS Console
+1️⃣ Go to AWS Lambda → Your Function
+2️⃣ Click "Triggers" → "Add Trigger"
+3️⃣ Select "SQS" as the event source
+4️⃣ Choose the SQS queue you want to monitor
+
+so once the new messages arrived in sqs, aws will note that and trigger the lamda function , and lamda do fix it accordingly or scale the ec2 instance. 	
+
+
 ##############################################################################################
 SQS : SImple queing service 
 
@@ -2416,13 +2773,126 @@ Standared queue provide best effort to ensures that messages will be  generally 
 
 FIFO :  Firstin first out deliver exactly in the same order (in sequence) . It will not create duplicate entry becauuse it will wait and remove the data once the ec2 complete its work. 
 300 transaction per seconds,  not fast as standard queue.
+
+
+Scenario:
+A payment gateway processes transactions submitted by users. Each transaction involves validation, fraud detection, and updating the database. By using SQS with Lambda, the system can handle transactions asynchronously while ensuring reliability and fault tolerance.
+
+
+Frontend: Submits transaction details to an API Gateway.
+
+Producer Lambda:
+Validates the transaction details and places it in the SQS queue.
+
+SQS Queue (transaction-processing-queue): Stores transactions for processing.
+
+Consumer Lambda:
+Processes transactions from the SQS queue.
+Performs fraud detection and updates the database.
+and also it can call the payment gateway for processing the payment.
+once paymenet done lambda will notify the customer via email (SES) or anything 
+
+
+SQS uses a Visibility Timeout mechanism:
+When the Lambda function starts processing a message, the message becomes "invisible" to other consumers for a set duration (default is 30 seconds, configurable).
+If the Lambda function completes successfully within the visibility timeout, AWS deletes the message from the queue automatically.
+If the Lambda function fails or times out, the message becomes visible in the queue again for reprocessing.
+
+
 ###############################################################################
 Elastic transcoder 
 
 it is a media transcoder in the cloud. it converts media files from their original source format into different formats that will play on smartphones, tablet, pc etc
 #######################################################################################
-API Gateway :
-API that acts has a front door for appliction to access the data or functionality from your back end services such as ec2, code running on lamda , or any web application. API gateway has cache capablities to increase performance . and api is low cost and it scales automatically. and also we can logs results to cloud watch 
+API Gateway :  (LoveToCode -- youtube channel ) for this video  	
+API that acts has a front door for appliction to access the data or functionality from your back end services such as ec2, code running on lamda , or any web application. API gateway has cache capablities to increase performance . and api is low cost and it scales automatically. and also we can logs results to cloud watch
+
+
+CREATING API GATEWAY:
+
+CLick create api gateway --> we have 4 option 1) http api 2) rest api 3) websocket api 4) rest api private (REST API that is only accessible from within a VPC.)
+
+choose rest api --> choose "new api" (we have other option like cloning exisitin api and import api if we have any like that ) -- api name -->  choose the api endpoint type ( regional , edge optimized , private ) regional means in that region only api will works , edge optimized will work on all the regions (use cloud front) ) choose the 
+edge optimized so that our api endpoint can be accessed from anywhere.
+
+Now we have to create a resource ( customize our api endpoint how it have to work ) create a resource  --> enter the name as user  (/user) 
+now we have to customize how /user will work .  click "create method"  choose the method type (get , put, post, delete , etc..) in our case choose Get --> choose the integration type ( lamda function, http endpoint , aws service, vpc link (private link) ) choose lamda ---> then choose the lamda function that we created ( we have to create one before. lets say we have a lamda function which will get all the user details from the dynamo db ) and also choose the region where lamda function is created. and then click create method.  ( now method is created)
+
+Once done we have to deploy the api that we created (so then only we will get a link endpoint to use ) . so click on deploy and choose the stage (we can creaste like dev, prod, stage  anything we named) we create a stage name "dev" in our case so choose that dev while we click on deploy buttion.  now the api is deployed in the stage "dev" (what is stage ? its like namespace just think like that) once we done that . we will get a link (https.dahodhadf.amazon.com/user) so once use this link in postman,  it will trigger the lamda and lamda will check the db and get the user deteails from the db and reply to the user via the same api. like that we can use the post method to enter the details in the database (like save the user details in the dynomo db)
+
+we can also authorize this api ( so that all of them canot use this api endpoint to get the result ) we can use lamda authorize. so when we use the api endpoint in the postman we have to pass the "token" so then only the api will response otherwise it will give unauthorized. so lets checck how to do this. 
+
+so first we have to create a lamda function ( which will used for autorizzation like it will check and validate whether the token is passeed is valid or not , if not it will not authorize ) so we have to create lamda function for that and in that function we have to mention the "token". so whoever using that api should pass this token then only they will get the response back.
+
+create authorizer--> choose lamda ( we have two types lamda, cognito) and then choose the lamda function that we crete for authorization --> choose the option "token" (using the token option only we going to validate right) --> type the token source  just enter "auth-type" , (so when we using post man we have to pass "key and value" for authorization , in that way key will be "auth-type" and value will be the token that we mention in the lamda function ( eg: xyz123). so whatever the value that we passing in the "auth-type" in the postman that value willbe validated in the lamda and if it is right then it will work .) so once the authorizer is created . we have to apply this authorizer that we created to the api gateway where we have to put authorizer.  lets say we created " user" api right  in that go and edit that and in the authorizer field choose our authorizer that we created. so whoever trying to use this link have to pass the token to get the result.  (AWS Made Easy - youtube channel)
+
+
+
+
+
+Difference between http api and rest api:
+
+Both HTTP API and REST API handle similar tasks like GET, PUT, POST, and DELETE, but the difference lies in how they are implemented and what features they provide:
+
+Http api:
+
+ No API Gateway caching or request validation.
+ cheaper than rest api
+ very fast compare to rest api
+ Use HTTP API for simple, fast, and cost-effective APIs.
+
+rest api"
+
+
+Suitable for advanced scenarios where you need more control and features.
+Offers API Gateway caching, request validation, throttling, and more
+Supports monitoring through AWS CloudWatch.
+More expensive compared to HTTP APIs
+Building APIs with complex authentication (e.g., IAM, Cognito or lamda auth).
+Use REST API for feature-rich, legacy, or enterprise-grade applications.
+
+More detail:
+
+Request Validation:
+
+REST APIs in AWS API Gateway support built-in request validation. You can define schemas for incoming requests (e.g., JSON structure) to ensure all required fields are provided and properly formatted.
+HTTP APIs do not support request validation.
+
+Caching:
+
+REST APIs allow you to enable caching for specific endpoints (e.g., transaction history), improving performance by reducing backend load.
+HTTP APIs do not have built-in caching capabilities.
+
+Advanced Security:
+
+REST APIs support AWS IAM and Amazon Cognito for advanced authentication and authorization.
+HTTP APIs support simpler authentication methods like JWT but lack the full integration with IAM policies.
+
+Monitoring and Throttling:
+
+REST APIs offer detailed CloudWatch metrics and throttling for better monitoring and controlling API usage.
+HTTP APIs have basic logging and monitoring but not as comprehensive.
+
+
+Why Not Use HTTP API?
+HTTP APIs are great for simple use cases but lack the advanced features needed for critical systems like a payment gateway:
+
+No request validation = Risk of incorrect or incomplete data being processed.
+No caching = Increased latency and backend server load for frequently accessed endpoints.
+Limited authentication options = Reduced control over secure access to your APIs.
+
+Conclusion:
+For a payment gateway, where security, reliability, and data validation are critical, a REST API is the best choice.
+If you just need a simple API for, say, serving static content or querying basic data (e.g., fetching public blog posts), then an HTTP API is sufficient.
+
+
+Purpose of WebSocket in API Gateway:
+
+WebSockets are ideal for apps requiring real-time updates, such as chat applications, gaming, live notifications, or stock price tracking.
+Bi-Directional Communication: Both client and server can send messages to each other at any time after the connection is established.
+
+
+ 
 ###########################################################
 Web identity federation - cognito
 *********************************
@@ -2514,6 +2984,38 @@ Mathematically related public/private key pair
 we can download the public key and use outside the aws to access the services
 Used  outside aws by users who cant call KMS api .
 AWS services integrated with KMS wil not use asymentric cmk
+
+
+
+AWS managed key
+customer managed key
+
+
+
+symmetric keys - both encryption and decryption are done with same key
+asymentic keys = the encyprtion and decryption will happen with two different key that's called public and private
+
+Aws managed key is a symmetric key
+
+
+Customer managed key :
+Is the key where we can create our own key . click create key --> choose symmetric or asymettric ( symmetric choose) --> key usage ( choose entrypt and decrypt) -- advance option
+1 kms 2 external import 3 aws cloudhsm key store   ( choose the kms which is recommended - where kms will generate the key for you or if we choose exteral we can import our own key)
+and then choose single region or multi region (whatever we use)
+and then it will ask for define key permission ( who can manage the key or administrate the key , we can give IAM user or roles if we need) and also there is option "allow key administrator to delete the key" if we want we can enable or disable. 
+next we have to choose the keyusers ( who is going to use tis key for encryption and decrption) IAM users groups or roles. and there is also a option for adding another aws account to use this key.  that's it we can review and click done to complete . Now we have a customer managed key with us (symmetric). if you need to enable the key roatation policy , choose the custom key that you created and in the option you can see the  key rotation just enable it that's it. 
+
+If we want the key with assymetric , we can choose asymmetric option, and other steps are same like the above one.  and if you want the public key , you can go and open the custom key that you created as assyemtric and in the option you can get public key . jjust copy that and you can use that to authenticate. 
+
+so now we have both kind of custom key  that we created . one is symmetric and other is asymmetric. you can use this key for any service for encryption . 
+
+
+
+so for example when we try to copy the ebs snapshot (encrypted) from one region to other region. we use copy option and we will copy the ebs snapshot to other region, while copying itself we can enable the encryption or disable it . if we enable the encryption we have to choose the target kms key to wich we want to use for the encryption once done , the ebs will copy and paste it on the target with the encryption ( target kkey )
+
+so how without using the source key we doing this, without decrypting the ebs from the source key how it goes.
+
+so aws will manage itself like first it will decrypt the ebs with the source key and then only it will encrypt with the target key that we choose and then place it in the destination region. so first decrypt will be done and then only it will copy . so if we dont have permission for the decryption from the source then it is not possible. so we should have enough permission to decrypt the ebs volume while copying  to other region . 
 
 ################################################################################
 CORS : Corss orgin resourse sharing  
@@ -2812,7 +3314,7 @@ WORKED PROCESS
 
 
 Create a bucket in both source and destination bucket.
-create a replication rule in source bucket, when creating the replication rule it will ask for "create a role " or existing role . you can choose the create role , so that it will create a role by itself accordingly.  and also I have given the code which is created (for reference) by itself.
+create a replication rule in source bucket, it will ask for other account id and the bucket name enter the information , when creating the replication rule it will ask for "create a role " or existing role . you can choose the create role , so that it will create a role by itself accordingly.  and also I have given the code which is created (for reference) by itself.
 
 
 Summary in Simple Terms:
@@ -2899,7 +3401,7 @@ s3:ReplicateObject: Permission to replicate an object from one bucket to another
 s3:ReplicateTags: Permission to replicate object tags from the source to the destination bucket.
 
 
-
+VIDEO REF : https://www.youtube.com/watch?v=tEpJxHlb5qQ
 
 
 
@@ -2911,6 +3413,67 @@ Private hosted zone: This will not face the internet . The domain name that crea
 
 
 Public hosted zone : this is usual thing that we do, purchase the domain name and configure in the route 53 which can be access via internet
+
+
+
+GIT STATERGY
+
+main (or master):
+
+The stable production branch.
+Only contains tested and deployed code.
+Used for hotfixes and as the source for release branches.
+
+develop:
+
+Integration branch where developers merge their feature branches.
+Prepares code for the next release cycle
+
+.
+Feature branches (e.g., feature/add-login):
+
+Created for individual features or tasks.
+Merged into develop after completion and code review.
+
+
+Release branches (e.g., release/v1.2):
+
+Created from develop when a release is being prepared.
+Stabilizes the release with bug fixes, final testing, and minor adjustments.
+Merged into main and develop upon release.
+
+
+Hotfix branches (e.g., hotfix/fix-payment-bug):
+
+Created from main to address urgent production issues.
+Merged back into main and develop.
+
+
+Real-World Scenario Example
+Project: E-commerce Website
+Current production version: v1.1 (on main).
+Next planned release: v1.2.
+Feature Development:
+
+feature/add-to-cart branch is created, developed, and merged into develop.
+feature/payment-gateway branch is created, developed, and merged into develop.
+
+Release Preparation:
+
+A release/v1.2 branch is created from develop for testing.
+QA tests the release branch.
+Minor bugs in the checkout flow are fixed in release/v1.2. directly
+
+Production Deployment:
+
+Once testing is complete, release/v1.2 is merged into main and devleop
+The CI/CD pipeline automatically deploys main to production.
+
+Hotfix:
+
+A critical payment bug is discovered in production (v1.2).
+A hotfix/fix-payment-bug branch is created from main.
+The fix is tested and merged into both main and develop.
 
 
 END
@@ -2944,4 +3507,340 @@ This AWS service facilitates security analysis, compliance auditing, and resourc
 A Denial of Service (DoS) attack occurs when a malicious attempt affects the availability of a particular system, such as an application or a website, to the end-users. A DDoS attack or a Distributed Denial of Service attack occurs when the attacker uses multiple sources to generate the attack.DDoS attacks are generally segregated based on the layer of the Open Systems Interconnection (OSI) model that they attack. The most common DDoS attacks tend to be at the Network, Transport, Presentation, and Application layers, corresponding to layers 3, 4, 6, and 7, respectively.
 
 
+
+CICD work flow in aws:
+
+In AWS cicd pipeline our sourcecode is placed in the GIT repository, where all our application code will be placed there and if there is any change in the code it will trigger the code-pipeline. code-pipeline is nothing but it is an orchestrator which will triger the code build. where all our pipeline script will be placed in the buildspec.yaml. in that we will mention all the things like the code should go thirough unit test, code quality , and then build the image  and then it will scan the image, once image build it will push the image to docker hub,  so these things are coded in the buildspec.yaml file. so the code pipeline trigger the code build , which will run all these stages once it is completed , then it will trigger the code-deploy, so in the code-deploy we mention where to deploy our application whether its ec2 or ecs kind of things. so in case if we have to push the code to eks . then we dont need the code deply , in the buildspec.yaml itself we can mention in the post-build like 
+
+    - echo "Deploying to EKS..."
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region us-east-1
+      - kubectl apply -f $DEPLOYMENT_MANIFEST
+      - echo "Deployment successful!"
+
+so, everything will be done in buildspec itself. 
+
+
+
+3. CI/CD Workflow for Production Deployment
+1️⃣ Developer Pushes Code to GitHub
+2️⃣ AWS CodePipeline Triggers CodeBuild
+3️⃣ CodeBuild Executes the buildspec.yml
+✅ Unit Tests (pytest)
+✅ Code Quality (pylint)
+✅ Security Scans (bandit, safety)
+✅ API & Load Testing (pytest, locust) and SonarQube test will be done
+✅ Docker Image Build & Scan (trivy)
+4️⃣ Docker Image is Pushed to DockerHub
+5️⃣ EC2 Auto Scaling Group  or ec2 Pulls the New Image & Deploys
+
+Unit Tests	                pytest	✅ Yes
+Code Quality (Linting)	        pylint	✅ Yes
+Security Scan	                bandit	✅ Yes
+Integration Tests (APIs & DBs)	pytest + requests	✅ Yes
+Docker Image Security Scan	trivy	✅ Yes
+
+
+BUILD SPEC.YML
+
+
+version: 0.2
+
+env:
+  variables:
+    SONAR_HOST_URL: "https://sonarqube.example.com"   # Replace with your SonarQube server URL
+    PROJECT_KEY: "my-python-project"
+    REGISTRY_URL: "quay.io/your-namespace"
+  parameter-store:
+    SONAR_TOKEN: "/sonarqube/token"   # Fetch from AWS Systems Manager Parameter Store
+    QUAY_USERNAME: "/quay/username"
+    QUAY_PASSWORD: "/quay/password"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+      java: corretto11   # Required for SonarScanner
+      docker: latest
+    commands:
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - echo "Installing SonarScanner..."
+      - curl -o sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
+      - unzip sonar-scanner.zip
+      - export PATH=$PATH:$(pwd)/sonar-scanner-4.7.0.2747-linux/bin
+      - echo "Installing security tools..."
+      - pip install bandit safety
+
+  pre_build:
+    commands:
+      - echo "Running security scans..."
+      - bandit -r .   # Security scan for Python
+      - safety check   # Check for known vulnerabilities in dependencies
+      - echo "Running unit tests..."
+      - pytest --junitxml=report.xml  # Run unit tests
+      - echo "Running SonarQube Analysis..."
+      - sonar-scanner \
+          -Dsonar.projectKey=$PROJECT_KEY \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.python.coverage.reportPaths=coverage.xml
+
+  build:
+    commands:
+      - echo "Logging into Quay.io..."
+      - echo $QUAY_PASSWORD | docker login -u $QUAY_USERNAME --password-stdin quay.io
+      - BUILD_TAG=$(date +%Y%m%d%H%M%S)
+      - IMAGE_NAME="$REGISTRY_URL/my-python-app:$BUILD_TAG"
+      - echo "Building Docker image: $IMAGE_NAME"
+      - docker build -t $IMAGE_NAME .
+      - docker push $IMAGE_NAME
+      - echo "Docker image pushed successfully!"
+
+  post_build:
+    commands:
+      - echo "Updating Kubernetes deployment manifest..."
+      - sed -i "s|image: .*|image: $IMAGE_NAME|" deployment.yaml
+      - git config --global user.email "cicd-bot@example.com"
+      - git config --global user.name "CI/CD Bot"
+      - git add deployment.yaml
+      - git commit -m "Updated deployment image to $IMAGE_NAME"
+      - git push origin main
+      - echo "Deployment manifest updated successfully!"
+
+artifacts:
+  files:
+    - report.xml
+
+
+Install	       Install dependencies, SonarScanner, security tools (Bandit, Safety)
+Pre-Build	Run security scans, unit tests, and SonarQube analysis
+Build	         Build and push Docker image to Quay.io
+Post-Build	Update Kubernetes manifest in Git for ArgoCD deployment
+
+
+
+Instead of installing tools on every build, create a custom Docker image with all dependencies pre-installed.
+Store this image in Amazon ECR or Quay.io and use it in your CodeBuild project.
+so while creating the code build use this image.
+
+AFTER USING PREINSTALLED IMAGE
+
+
+version: 0.2
+
+env:
+  variables:
+    SONAR_HOST_URL: "https://sonarqube.example.com"
+    PROJECT_KEY: "my-python-project"
+    REGISTRY_URL: "quay.io/your-namespace"
+  parameter-store:
+    SONAR_TOKEN: "/sonarqube/token"
+    QUAY_USERNAME: "/quay/username"
+    QUAY_PASSWORD: "/quay/password"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Fetching credentials from AWS Parameter Store..."
+      - export SONAR_TOKEN=$(aws ssm get-parameter --name /sonarqube/token --with-decryption --query Parameter.Value --output text)
+      - export QUAY_USERNAME=$(aws ssm get-parameter --name /quay/username --with-decryption --query Parameter.Value --output text)
+      - export QUAY_PASSWORD=$(aws ssm get-parameter --name /quay/password --with-decryption --query Parameter.Value --output text)
+
+      - echo "Running Security Scans..."
+      - bandit -r .  # Security scanning for Python code
+      - safety check  # Dependency vulnerability scanning
+
+      - echo "Running Unit Tests..."
+      - pytest --junitxml=report.xml  # Running Python unit tests
+
+      - echo "Running SonarQube Analysis..."
+      - sonar-scanner \
+          -Dsonar.projectKey=$PROJECT_KEY \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.python.coverage.reportPaths=coverage.xml
+
+  build:
+    commands:
+      - echo "Logging into Quay.io..."
+      - echo $QUAY_PASSWORD | docker login -u $QUAY_USERNAME --password-stdin quay.io
+
+      - BUILD_TAG=$(date +%Y%m%d%H%M%S)
+      - IMAGE_NAME="$REGISTRY_URL/my-python-app:$BUILD_TAG"
+      - echo "Building Docker image: $IMAGE_NAME"
+      - docker build -t $IMAGE_NAME .
+
+      - echo "Scanning Docker image for vulnerabilities using Trivy..."
+      - trivy image --exit-code 1 --severity CRITICAL,HIGH $IMAGE_NAME
+      - echo "Trivy scan passed!"
+
+      - echo "Pushing Docker image to Quay.io..."
+      - docker push $IMAGE_NAME
+      - echo "Docker image pushed successfully!"
+
+  post_build:
+    commands:
+      - echo "Updating Kubernetes Deployment YAML..."
+      - sed -i "s|image: .*|image: $IMAGE_NAME|" deployment.yaml
+      - git config --global user.email "cicd-bot@example.com"
+      - git config --global user.name "CI/CD Bot"
+      - git add deployment.yaml
+      - git commit -m "Updated deployment image to $IMAGE_NAME"
+      - git push origin main
+      - echo "Deployment YAML updated successfully!"
+
+artifacts:
+  files:
+    - report.xml
+
+
+NOTE: instead of installing SonarQube and trivy in the code-build image, just we can have separate instance where both installed separately and running so that all the pipelines can use this server for sonarque and scaning images , instead of installing them in the codebuild image which is not stable.  so if we installed separately means we can call this remotely in the buildspec.yml file and we can do the scan . 
+
+
+
+
+CODE DEPLOY :
+
+
+PYTHON CODE INSIDE FILE
+
+Docker file
+app.py   - application code 
+appspec.yml     --- mentioned below
+buildspec.yml
+requirements.txt  - (List of dependencies) like flash gunicorn
+start_container.sh   
+stop_container.sh
+
+IN APPSEPC.YML we have included start_container.sh and stop_container.sh
+
+hooks:
+ ApplicationStop:
+  - location: stop_container.sh ( In this sh , we have to stop the previously running container, why because before inititating the deployment we have to stop the previous one right)
+    timeout :300
+    runas: root
+ AfterInstall: 
+ - location: start_container.sh   --( in this sh  we have two commands, pull the docker image and run the container , I have mentioned the command below)
+    timeout :300
+    runas: root
+   
+
+
+start_container.sh
+docker pull abhishekf5/simple-phython-flask-app
+docker run -d -p 5000:5000 abhishekf5/simple-phython-flask-app
+
+Stop_container.sh    - which is used to remove the previous container, otherwise when the new container created it will be collapsed 
+
+containerid= 'docker ps | awk -F " " '{print $1}''
+docker rm -f $containerid   
+
+
+code deploy -> create application -> Application name ( sample-python-flask-app ) we have many modules so each module is an application right for example payment moduel is an application so we can give payment-dev as a application name. but in this we followed the video so gave sample-python  - and next option is compute platform in this we can choose where we going to deploy the application ( ec2/onpremisis , ecs, or lamda) choose ec2/onpremisis.  and create application.  so if we have many modeules like 50 modules we have to create in this way for each module as an application . to automate we can use CLI for creating bunch
+
+Now create an ec2 instance (where our application is going to be installed as a docker , so install the docker also in this ec2). ec2 name sample-python and create a tag "environment : prod"  "project : payment"  so when our we going to deploy the application we will choose the tag name so that the application will be install in the all the ec2 instance which has this tag name . 
+Once created the ec2 instance we have to install the code-deploy agent in the ec2 instance. ( code-deploy should be install in all the ec2 instance where code-deploy is going to deploy our application )
+
+Note : IAM Roles is mainly used for services to talk with other services whereas IAM user is to used for talk with services direclty
+
+NOW create a role :  for giving permison for accessing the code-deploy 
+entity - aws service  usecase-> code deploy   rolenaeme -> ec2-codedeply-role    (permission will be automatically taken check that) . once role create attach to the ec2 instance that we created.
+
+Now we come back to code-deploy ( till now we created only application) 
+
+go to the code-deply - go to the applicaction that we created --> there will be option for ( deploymets and deployment group)  deployment group is nothing but target group where our application is going to be installed.   so choose the deployment group and give deployemnt group name "sample-python-app"  and choose the role " that we created above " ( in that role we just give access to code-deploy permission , so go and edit that role and give access to ec2 also . so that this role has permssion for ec2 to acess the code-deply and code-deploy to access the ec2 , both way it can be accessed. or if you want you can create 2 seperate roles )
+deployment type -> choose "in-place"  just for demo ,, we do have blue-green deployment also
+environment configuration ->  choose amazon ec2 instance , we do have also auto scaling groups
+Once ec2 instance chossed, it will ask the tag name, enter the tag name that we given to ec2 isntance. so all the instance that have this tag name will be considered. 
+and create deployment group ( we do have some other option also LB and other but we dont do that for demo) finally deployment group created. now we have to create the deployment which I mentioned in starting. 
+
+for code build we have buildspec.yaml like that for create deployment we have appsepc.yml
+
+Create deployment ( in this we will say where our application code is present )
+create deployment -> enter deployment group name  which we created above " sample-python-app"  and then  choose the git hub option  where our code is stored ( we have other option s3 bucket) and then give repository name   and then create deployment.
+
+once we click on the create deployment it will start deploying the application on our ec2 instance as a docker image ( this is manual for testing purpose, for production level it will automaticall run when there is a code change ) . so what are all the process it is doing while depolyment ?
+
+there are many steps like (Applicationstop, dowloadBundle, BeforeInstall, Install, AfterInstall, ApplicationStart, validateService). In these steps we going to run oly AfterInstall and ApplicationStop , where in these we have already mentioned 2 scripts above to run on this in the appspec.yaml.  All together is when we start the deployment it will run the appspec.yml file configuration , in that ApplicatonStop and AfterInstall are going to run the script .  so first it will remove the old container which is running , and then it will pull the new images run the new container with the changes that happened in the code . 
+
+Now Till Now we created the CODE DEPLOY  and tested. Now we have to include this in the code pipeline , so once the build is completed it will automatically trigger the code-deploy of the deployment 
+
+so go to the code-pipeline and choose our code-pipeline and click the add stage and choose the code-deploy  and choose the application name (code-deplyname that we initiall created when we start the code-deploy) and choose the deployment group and click done. thats it .  Now if we have any changes in the code it will automatically trigger the pipeline. 
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+cross account s3
+s3 transffer accelerator tool
+aws datasysnc 
+creating cloutfront distribution for s3 bucket
+Mounting the s3 bucket in server (both windows and linux), using storage gateway 
+Adding storage to the server , increasing root volume.
+#######################################
+Moving EBS volume from one region to other region :  take a snapshot of volume , move the snapshot to other region ( by copying we can choose other region), create a volume using that snapshot.
+
+####################################
+Moving one ec2 instance from one region to other region -->  take snapshot of the ebs volume -> go to snapshot and convert the snapshot into ami -> once ami created move that ami to other region ( by copyying chossing other region)-> once done create ec2 in other region
+######################################
+Moving snapshot from one acc to other acc -> (if the snapshot is encrypted we have to make a copy of the source snapshot, while making the copy we have to choose "diffrent key for encryption")
+
+Choose the copied snapshot and choose modify permission and give the account ID (which you need to share) 
+
+we need to share the encryption key to the other account -> go to IAM -> encryption key - > choose the key that you used -> "OTHER AWS account" option enter the  other aws account id
+
+NOW both snapshot and key are shared to other account.
+
+CNAME & ALIAS:
+
+Cname : routes traffic to another domain
+Cname  -> we can give cname for one domain name to other domain name  eg : dev.srini.com  cname -> prod.srini.com
+
+where here domain name is srini.com  --> we cannot create cname for srini.com -> prod.srini.com   it will not accept. 
+
+ALias -> here we can create alias directly for srini.com 
+Alias can be used for other aws services endpoint like s3bucket , cloudfront, VPC endpoint and also LB
+
+eg : srini.com -> s3url (or) vpcendpoint etc..   
+
+
+############################################
+
+Mounting EFS for the requested server.
+giving access to s3 bucket using VPC endpoint ( amazonn s3 gateway)
+Creating private link using vpc endpoint service 
+Connecting two VPC using transist gateway
+
+ 
+
+
+
+
+
+
+cname and alias
+
+
+
+
+
 Dec_2024
+
+
+virtual private gateway
+alias record in s3
+Custom domain for an Amazon S3 bucket using Route 53?
+VPN
+SAML login
+
+103.98.209.18
+
+Punitharaja25@gmail.com
+
+Yuvayazhini11$
+https://www.youtube.com/watch?v=pXNB8uAGlx8 -- cicd
+
+
+03.03.2025    interviee 
