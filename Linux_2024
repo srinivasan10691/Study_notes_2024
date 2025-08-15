@@ -1,0 +1,1734 @@
+Security - selinux, firewall, premissions and PAM (plugable authentication moduels )
+
+DHCp  547  546-c
+ldap  389
+ftp 20 -data  21 - control
+https 443
+dns 53
+
+
+
+Filesystem hierarchy or linux directory structure 
+
+
+/root   - root home directory
+/Var    - consist of dynamic data ( storing the logs informations) logs will help to troubleshooting  
+/bin    - conisists of binary files (commands)-> thats execute by all the user
+/boot   - bootable file information (operating system related files)
+/dev/   - All the hardisk information or LVMs information ( storage)
+/etc/   - config files ( settings file )  
+/home   - default home directory for all the normal user.
+/lib/   - consits of shared library which are useful for operation system ( if it is 64 bit then lib64)
+/media/ - Removable media information ( eg pendrive)
+/mnt/   - mounted file system informations ( 
+/opt/   - optional - extra softwares those will be available in this ( add on applicagtion software packages )
+/sbin   - system binaries, execute only by root or sudo users. 
+/srv/   - service related information ( discuss later ) 
+/tmp/   - consist of temp file . you can store temporary files
+/usr/   - consist of information about manual files (MAN) , 
+/proc/  - Process information . all the process related information (how much memeory is consuming , process id, since whern it is runing , etc )system related information as file
+
+stat - display the statitics about the file ( time of modify, access, chagne ) -a -m -c
+         touch -m 2019-06-19
+
+cat > argun ( create a new file if not present )
+> write data 
+
+ctrl + D save and exit
+
+> overwritting  >> appending
+
+cat filename - readingfile
+
+mkdir file1 file2 file3
+mkdir file{1..9}
+
+cp arjun god  - copy the data from arjun and save it in god ( if not created it will create the one )
+
+cat -b arjun god  ( create a backup file of the God) and the data from arjun will be copied to god .
+
+cp -r dir/* dir1  - copy the files from dir and save it on the dir1 
+
+cp -r dir dir1 - copy the whole directory and save it on the dir1
+
+MV - no need -r 
+
+rm - remove (always prompt for confirmation)
+rm -f  f1 ( without prompt ) files 
+rm -rf dire1 ( without prompt ) directory or rmdir dir1 ( only empty directory delete )
+
+ll = ls -i
+
+alias - we can see what are the alias is there
+if we have to remove allias -> unalias rm
+
+cd - ( back to the place where you came from)
+cd .. ( parent directory)
+
+How a command execute
+touch -> look on to path ( echo $PATH) and check whether any command is created and then it will execute
+
+If we create a script and put it on the $PATH so that we can execute the script from anywhere
+
+ls -l  ( more information about the file ) permission and time created
+ll is alisas for ls -l ( long listing)
+
+-rw-rr---r-- ( permision ) 1 (links ) root (owner name) root (group) 236(size) jun 18 09:23 ( modified time ) file ( file name or the directory name)
+
+ls -lt ( based on time stamp ) latest to oldest
+ls -ltr (oldest to latest)
+ls -l abc*  ( it will list the abc* files)
+
+ls -i ( listing the inode numbers of files and directories)
+
+for system understanding inode numbers are assigned for every files   The number belong to where it stored in harddisk 
+
+ls -R ( it will display the data recursively ) it will also display the content of the inside directory
+
+ls -m - all the files seperated by column
+ls -n  ( display the owner id number and groupid instead of name )
+
+ls -ld d(directory)  - information about directory
+ls -l f(file)  - information about file 
+
+Vi or vim
+
+G  - end of the file
+g - starteing of the file 
+u - undo
+YY - copying the line ( mulitple line 3yy or 10yy or 5yy ) file will be copied
+p - pasting below the line   P- pasting abovee the line
+dd- delete the line (10dd or 5dd)
+
+set nu  - set numbers
+
+se nonu - set no numbers
+
+Umask - User file creation mask
+
+For directory the full default permission is 777 (because it is executable)  777 -022
+for file the full default  permission is 666 (because it is not executable)  666 -022
+
+changing umask - umask 044
+root user - 0022
+normal user -0002
+
+The default umask 002 used for normal user. With this mask default directory permissions are 775 and default file permissions are 664.
+The default umask for the root user is 022 result into default directory permissions are 755 and default file permissions are 644.
+
+Inode contains informtion about the file, Owner name , group name,  permissions , where the file stored. but it wil not store the file name
+eg stats filename ( the information gets from inode)
+
+we cant create hardlink for directories bcoz same inode number and sys will confuse
+but we can create it on softlink 
+If we delete the original file , the link file will be there for use (hardlink)
+If we delete the original file, the link file will not work in softlink case
+
+Hardlink
+
+#Each hard linked file is assigned the same Inode value as the original, therefore they reference the same physical file location. Hard links more flexible and remain linked even if the original or linked files are moved throughout the file system, although hard links are unable to cross different file systems.
+# Even if we change the filename of the original file then also the hard links properly work.
+# The disadvantage of hard links is that it cannot be created for files on different file systems and it cannot be created for special files or directories.
+Command  - ln original_filename filename
+
+Softlink
+
+#Each soft linked file contains a separate Inode value that points to the original file. As similar to hard links, any changes to the data in either file is reflected in the other. Soft links can be linked across different file systems, although if the original file is deleted or moved, the soft linked file will not work correctly (called hanging link).
+
+# Soft Link contains the path for original file and not the contents.
+#Size of a soft link is equal to the name of the file for which the soft link is created. E.g If name of file is file1 then size of it s soft link will be 5 bytes which is equal to size of name of original file.
+#If we change the name of the original file then all the soft links for that file become dangling i.e. they are worthless now. Data will not be present
+ Command
+ln  -s [original filename] [link name] 
+
+*********************ACL****************
+
+setfacl -m  u:tom:rwx filename       for group   g:tom:r filename
+getfacl -m   ( getting information of the file permissions)
+
+setfacl -Rm g:tom:r filename (for recursive action , applies the permission inside the folders)
+setfacl -dRm g:tom:r filename (upcoming files will also be created in this permision)
+
+setfacl -d (default acl)
+
+Special permissions :
+
+
+Set-uid  ( behaves like owner of the file)
+
+If any other usr wants to act like owner of the file while executing that file. 
+
+While executing the file, it will use the permssion from the owner of the file instead of who is executing the file. 
+
+eg ; Passwd command    normal user can use passwd command and root as well. But file is ownedd by root 
+if there is a s in the owner permission then it is set uid
+-rwsr-xr-x
+
+Another eg : /root has listing permisison for only root user not for others . so when srini user trying to ls /root  it will deny it. 
+So once we go to  /usr/bin and apply set-uid to "ls" file . and after then whoever trying to execute the ls command they have the owner permission . In this root is the owner for ls . So when when we try to list the /root now it will list the file.
+
+if you want to behave like owner of the file set-uid is used.
+
+chmod u+s filename (or)
+chmod 4644  ( first number  (4)- set uid ) others are file permision existing permision of the directory
+
+set-gid  - inherit the group from the par1ent directory ----> have to learn uid and gid    -- tom tom 
+
+This can set on both files and directories. if the directory has group owner (srinivasan) and other user (ram ) creating files inside the directory , then the file group owner will be srinivasan not ram .
+
+
+chmod g+s directoryname (or)
+chmod 2644 ( first number (2) - set gid)others are file permision
+
+Sticky bit -
+
+does not allow other users to delete the content of the directories if the content is not owned by him though he has full permissions on directory
+
+chmod o+t directoryname -----------? /tmp is come with sticky bit default, 
+chmod 1644
+
+numberical number is 1
+
+
+
+chmod a+x filename ( to give execute permissions for file)
+--------------------------------------------------------------
+Truncate : to empty a file (log) without deleting the file. we can use truncate to empty the file
+eg : if some processor is using a test file, where we cant able to remove the test file due to some process is using. but we need to empty the file because the file has taken large amount of space . So to gain the space we can truncate the file by using any one of the below three commands
+
+echo > file 
+> file
+truncate -s 0 file
+
+FIND :
+
+find / -name filename    -> we can use this for file name , wherre it will search from root directtory
+find /home -type d -name directory  -> we can use this for directory, where it will search from /home directory
+
+DIFF :
+FInd the difference between two files
+
+diff http.conf http.conf_bck
+
+Free -m  --> Ram usage
+sar --> current cpu usage
+cat /proc/cpuinfo   --> Cpu details like how many cpu and which model
+
+CPU :
+
+Top command run panitu 1 press pana it will show the per cpu usage (for eg if we have 2 cpu) and now we going to execute a script which will increase the cpu . now enter top command and press 1  it will show two cpu usage, one cpu will have 100 percent where other will be in idle(no usage) . so that script is completely takking one cpu and its full
+
+#############################################################
+
+Aliasing : Giving another name for an object ( for example ls -i which we normally used as ls )
+To list all the alias ---> alias
+
+alias h=hostname
+if we execute h then hostname will exectue
+alias h='hostname -f' (if we used any option have to put doublecodes)
+But these are temperoray ( if we restart it will be back to normal)
+
+to get it permanet 
+
+have to edit .bashrc ( it will be in homedirectory of every user 
+
+vi .bashrc
+
+alias h=hostname  and save and exit
+TO update it we have to type source .bashrc
+
+# source .filename ( which will update the file whithout reboot )
+
+Another user cannot use this alias since it was saved in root home directory . Every user has own .bashrc file
+
+So if we have to put common alisas for all user then we have to go for /etc/bashrc and then do              source /etc/bashrc
+
+
+History  -> shows the what are the commands that used
+all the history will be stored in .bash_history
+ls- a is not listed in .bash_history file ?
+because after completing the full session then only it will be update all the commands in history
+  
+
+history -c (currently used commands in that sessions will be clear)  - clear the history   but not in bash.history
+
+
+
+---------------------------------User and group administration-----------------------------------------
+
+
+Users:
+
+Root user , Normal user , service accounts ( every application that we installed has user accounts) 
+
+Username 
+password
+id
+shell
+homedirectory
+mail directory
+/etc/skel
+
+/etc/passwd  /etc/shadow  /etc/group ( these will update when u create a user )
+
+/etc/passwd
+
+arujn:x:2004:2004::/home/arjun:/bib/bash   -> on the blank filed we can use as comment ( anything we can comment about the userv)
+
+/etc/useradd/default  -> this file has content what to be there in useraccount while creating
+/etc/login.defs --> defalut password configuration settings ( password length , days of expire ) default one
+
+IF passwd file corrupted go to single user mode and copy passwd- and paste it as passwd . once done Use the pwconv command to create /etc/shadow file from the /etc/passwd file.
+Creating user with custom attributes
+d
+useradd -u <uid> -g (gid or gname) -d (-m)(homedirectory) -c (comment section) -s (shell) username
+
+
+-m if the path doesnot exit it will create 
+
+if we have to modify the above things
+
+usermod ( same as above thing)>
+usermod -G groupname username    to add the user into the group    -a will be appending the group.
+
+To change the username usermod -l newusername oldusername    Before doing this you should log out from the user which you are tyring to change..
+
+______________________________PASSWD______________________
+
+#passwd username
+
+/etc/shadwow  -> username:encrypted:last password change date : minimm no of days to use the password : max no of days to use the password :Warning : password inactive date (IF we give 0 John account will not be disabled even if his password is expired.) : Account inactive
+
+srini:$6$4c/1697J$9731wf/f0aFi4wUnvj1WlFa2QxKgRkMuiFXtHFQG.TrdvACURS7.LN1r1Du7E2A0iwshPaCC0BA4j1MoTaVCj0:18703:0:99999:7:::
+
+#chage -l iopex (password paraamenter of the particular user )   (chage --help)
+
+#userdel iopex (only delete the user account) not the content
+
+#userdel -r iopex
+
+groupadd joe  (/etc/group)  group related password availbe in /etc/gshadow
+groupadd -g 50000 joe ( changing group id)
+groupmod -g 5000 joe ------ groupmod -n joe newname  (chaning grp name)  gpasswd -M arjun,joe  groupname
+
+gpasswd -d tom groupname  ( removing user)
+
+getent passwd tom ( particular user information from passwd file)
+getent group tom 
+----------------------------------------------------------
+Shell details (/etc/shellls)
+
+if we assign /bin/nologin or /bin/false  user cannot login with his user name
+
+usermod -s /bin/nologin tom    usercannot login  ( another way of blocking the user)
+Usermod -L username (locking the user 
+usermod -U username( unlock)
+how to check if the user is locked or not, go to shadow file and check if any "!" mark on front of encrypted password
+
+if "!" is there on starting of passwd then it is locked otherwise it is not locked
+
+LOCKING BY PASSWORD
+
+passwd -l tom (lock)    Then in shadow file you will see "!!" 
+
+passwd -u tom     (unlok)
+
+passwd -S <username> --- will show user is locked or unlocked.
+
+
+_________________________________________________________________________________________________
+SUDO access --> super user do
+vi /etc/sudoers ( if make any syntax mistake it wil not show)  (or) visudo  ( it will show syntax error) -> to edit the file
+
+su tom (or) su - tom   -> diff
+su tom -> home directory wil be your directory (previous user directory)
+su - tom  -> home directory will be in tom
+
+#visudo   -> go to line number 100  and then enter
+
+tom ALL=(ALL)      ALL
+
+1st ALL -> All terminals he can use sudo command
+3rd ALL -> on all commands he can execute
+2nd ALL  -> execute sudo commands on anywhere or anyuser
+
+OR else you can add the user to group wheel 
+
+IF we add  tom  ALL=(ALL)   NOPASSWD:ALL ( It will not ask for password whenever you use sudo)
+
+for group sudo acess go to 109 line
+
+%joe ALL=(ALL)   ALL
+
+if we need to give only on some particular command then use the below line
+
+%joe ALL=(ALL)   /sbin/fdisk
+
+____________________________________________________________________________________________________________
+PARTITIONS AND FILE SYSTEMS:   28:00
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------
+UDEMY 
+
+ Find and locate - which is use to find and locate the files and directory
+
+Find command use  -   find / -name data.txt    -- it will search the data.txt file from / root  we can also choose the directory where to seearch
+locate command use - locate data.txt    ---> it will take the result from snapshot of the filesystem ( which will be taken by system in daily basis 24 hours)
+However, recent file additions or removals (within 24 hours) are not recorded in the snapshot and are unknown to locate. if we run the updatedb command then the snapshot will be updated and we can search the file that update within 24 hours.
+
+
+
+tee command 
+
+tee - which is used to display the output and also it will save it in seperate file
+
+ls -l | tee file1 file2  -> which will show the output and also the save the output in the file1 and file2
+
+
+more --> is the command which gives the ouput one page at a time( for next page we have to enter spc)
+tail  --> ls -l |tail -1   last line
+less --> same as more command, but if we press "j" it will move one by one line also we can use up arrows
+head --> head -2 filename --> we will see the first 2 lines
+tail  --> tail -2 filename -->last 2 lines
+
+cut   ----> cut -c1 filename(where you need to cut the words) > filename( to the save the content)
+            cut -c1-2 filename (first 2 words)
+
+awk  --->  awk '{print $1}' filename
+
+ls -l | tee file1 file2
+
+grep test filename ( whereever test line is there it will show )
+
+sort filename (it will sort the lines by alphabatical maner)    ( for reverse order sort -r filename)
+
+uniq -> which will remove the duplicate words , before using uniq we should sort it and then use it   
+        cat filename |sort |uniq
+
+wc - will give you no of lines, no of words , filesize ( wc filename)
+     wc filename 
+
+    cat filename | wc -l    ---> it will show no of lines
+
+diff --> gives you the difference of two files  ( shows the different lines(content) between two files)
+
+diff filename filename1
+
+cmp  ---> shows which line is different ( cmp filename filename1  )
+
+tar  ---> just to zip the files it will not compress
+gzip  --> it will zip the file
+
+tar cvf testing.tar files(which need to be zipped)
+gzip filename (which will be compressed the original file)
+gzip -d filename ( it will decompress the file)  or gunzip filename
+truncate --> where we can reduce and extent the file size . if we reduce the original size of the file then you will loose the content inside the file and we cannot retrieve it 
+             for example the file size is 40 now we need it to be 20  --> truncate -s 20 filename    now the size wil be 20 and inside the file half of the content wil be erased
+             we can also expand by truncate -s 50 filename now the file size will be 50 inside the file @@@@ symbol will be filled 
+
+Split --> use to split single file to multiple file . in a file it has 4 lines so we can seperate 2 lines for one file and other 2 lines for other file
+          split -l 2(lines) filename  seperatefile(seperated line wil be saved in this)    
+
+sed ----> sed 's/find/replace/g' filename  (g is for all words).  this only change in the screen not on the file to have change in file put (-i)
+          sed -i 's/find/replace/g' filename (and)  sed -i 's/find//g' filename  ---> it will replace with empty . sed '8!s/find/replace/g' filename (8th line will not change)       
+          sed -i '/delete/d' filename-> delete the word 	     sed '/^$/d' filename -----> which will remove the empty lines in the file
+          sed '1d' filename (or) sed '1,2d' file name ---> which will remove the 1st line and second line  sed 's/\t/ /g' filename --> replace tabspace with space
+          to use sed command directly on vi editor is  %s/find/replace/ --> it will change it in vi itself.
+
+sudo su  -> root or (sudo - )
+sudo - username
+
+who --> it will show who are all logged in to the system   :0 -> through gui  pts/0 --> through putty  and also terminal and ip ( simple)
+Last--> command will show who logged in logs and still logged in users with ip and date
+w    --> will also give who logged in ,at what time, and what are the process is running (extra  load average, idle time, ) 
+finger --> need to install it and check it  yum install finger -y
+id --> list the group id , user id, and what group the user belongs to .  (id username) or id which will give u the details who currently logged in.  (uid=1000(srini) gid=1000(srini) groups=1000(srini),10(wheel))
+
+users -> we can see who are all logged in to the system currently (helps to send message for reboot )
+wall --> it will broadcast the message to every users (CTRL + D ) to complete
+write  --> we can send message to specific person (wrire username)
+
+Samba add on feature -> winBIND
+
+Winbind --> the users in AD(windows) have to login to linux mac hine but it is not going to work because windowsAD will talk only to windows. so windbind is used in this (which is created by samba)
+which allows AD users to login into linux machine  -- check how it is happening
+
+
+LDAP  Is a protocal light weight access protocal(it is not directory service) it is just a protocal used for authentication.
+OpenLDAP it is Directory service like AD . In redhat we have IDM (identity manager) which is cost. so we can use openLDAP for testing. which will cover later on this course.
+
+UPtime - which shows the current time and uptime of system and load average of the system.
+hostname - shows the hostname
+uname -a - the hostname, kernal version and the time it was built.
+which - this is will show the path of the command that is located .    which pwd, which hostname
+cal - calender of current month.  cal 9 1977  it will show the month calender
+bc - calculater
+
+ps - will shw what are all the process is running in system     ps -ef |grep ntpd  (show the process) user , pid ,ppid, time and cmd
+
+The PPID is the PID of the process's parent. For example, if process1 with a PID of 101 starts a process named process2, then process2 will be given a unique PID, such as 3240, but it will be given the PPID of 101. It's a parent-child relationship
+
+top - show the process that runnin with memor and load information 
+PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND and also system time , uptime , usersession,CPU usage and mem usage, load average
+
+#Press  u  to see the processes for a single user. You ll be prompted for the name or UID.
+#The  NI  field shows the  nice  value of a process. The  PR  field shows the scheduling priority of the process from the perspective of the kernel. The nice value affects the priority of a process.
+# TIME - This is the total CPU time used by the process since it started, precise to the hundredths of a second.
+#  Sorting the process list
+One of the most frequent reasons to use a tool like top is to find out which process is consuming the most resources. You can press the following keys to sort the list:
+
+ M  to sort by memory usage
+ P  to sort by CPU usage
+ N  to sort by process ID
+ T  to sort by the running time
+
+
+kill - used to kill the process by process id or pkill process name
+chronyd (updated in 7 ) - ntpd (older) (network time protocal ) syc time in sys
+Top - it will show the load usage memory usage how many task running and sleeping
+PID USER PR NI VIRT RES SHR CPU MEM Time COMMAND( command associated with the process )
+7CRONTAB - to edit crontab -e (or) path of the crontab (min, hour, day of month , month , day of week)  /etc/
+there is a sperate folder for hourly monthly weekly daily . where we can push the scripts to that folder so that it will run daily monthly weekly but hourly as seprate file 0hourly (/etc/cron.d/0hourly)
+at -> scheduler but one time scheduler
+Nice -> process priority  (nice -n 5 process(command that need to execute) ) -20 to 19   the lower the number more priority. renice -n 10 processid  which will change the existing process
+
+CTRL + z - the running process will stop . we can check it by using command jobs . it will show what are all the jobs are stopped. so now we need to run that jobs in background
+so that we need to use bg . so tht the process will run background and we can use the terminal normally. if we need to process to show in terminal then we need to use the foreground (type fg)
+nohub --> which wil run the process even if we close the terminal.
+nohub sleep 100 & ( this will run the process background and also if we close the terminal it will run(sleep 100) )
+
+df -T -> it will show with filesystem
+df -h -> shows the disk usage details 
+du -> it will show which file taking space
+du -h /home/satish   it will show only directory informations with amount of space consumed . du -sh directory ( it will show the amount of space directory has but will not list the directories inside it )_
+du -ha /home/satish it will shows all the directory and files too.
+dmesg  -> it wil show the details bios information, isseus with memory, memory leak , motherboard issue, cpu creash, anything related to system hardware.
+IOSTAT -> input and output statics -- it will show the read and write statics of system pripheral devices like disk.	
+
+
+du -ha|sort -nr|head  -> which will list top large files including directoy
+						
+netstat -rvn - shows the network gateway details or we  can use route command . netstat is network statics which is used for network related issues
+free -> shows the memory and swap usages
+sar --> shows the CPU usage
+vmstat -> virtual memory statics
+
+LOGS
+boot logs store the booting logs
+Secure logs contain the user login and authentication fail details on that logs . tail -f secure will shows the currently updating logs too.
+message logs contain all the hardware, software and application and process information logs will be stored here. (grep -i error messages)
+
+HALT -> forcefull shutdown.
+
+Hostname change steps:
+
+hostnamectl set-hostname newhostname (or) edit /etc/hostname and edit new hostname and reboot it .   (init 6 ) will reboot (run level 0-6)
+
+uname -a -> shows the inforamtion about the os kernal version and when the system built and architecture of it. 
+dmidecode -> shows all the system information OS informations.
+CTRL + z -> if stuck on the process it will kill it and exit
+script filename -> which will records all the commands that you exectue with the output.
+cat /etc/os-release     os version
+
+RECOVER ROOT PASSWORD:
+
+Restart the system
+select the OS and press 'e' to edit   in that file search for " ro "(something behind like /root ) and in that remove ro and type "rw init=/sysroot/bin/sh" once done press CTRL+X (this will start your computer in single user mode)
+To mount the file system to sysroot below commands
+chroot /sysroot   ---> now we are in single user mode were we can perform any task if we unable to login to system
+now change the password
+passwd root ( enter the new password) once done
+update selinux by the below command
+touch /.autorelabel
+and then reboot it by the command reboot
+
+
+EXCUTED ON REDHAT
+
+choose the os and press e .  go to the line rhel quiet and change it to "init=/bin/bash" and ctrl+x once you get bash mode check whther / partition is ro or rw
+mount |grep root --> it will show whether root is rw or ro . TO change / to readwrite "mount -o remount,rw" which will change it to rw. if you want you can check.
+once done we can change the password by passwd command and then relabel it "touch /.autorelabel" once done reboot
+
+
+
+
+
+
+
+
+
+
+SOS report: sosreport command will collect all the system configuration file and save it in /var/tmp/sosreport in compressed format. we can send this to redhat support and seek for help.
+ 
+
+NETWORKING :
+
+Enabling internet in vm that installed in Oracale virtual box.
+
+Open virtual box manager and select network settings and choose "bridge adaptor" if we use wireless then choose "Dual band" if we use ethernet choose " Ethernetconnection"
+Now internet will work on your Vm. 
+
+Network files:
+Interface configuration files
+1) /etc/nsswitch.conf -->(we can get to know where the dns resolve is happening ) it will show where the password, host, dns information will get from and we can change that in this file. It wll show files(/etc/host or shadow or etc)
+2) /etc/hosts   -> Where we can type our ip address and the domanin name . now we can ping our system with our domain name (local dns)
+3) /etc/sysconfig/network in centos 6 . in 7 it is named /etc/hostname . hostname details
+4) /etc/sysconfig/network-scripts  --> where our network information will be stored. there will be a file ifcfg-enp0s3  this is our interface file where we have all the information about the interface.
+5) /etc/resolv.conf -->  DNS server ip will be saved in this file. in our part our ISP is the DNS server.
+
+ip link set eth1 up or down  . everythin ip based settings can be changed in infg-eth0(interface) and then once completed systemctl restart network.
+
+tcpdump -> traces all the incoming and outgoing traffic. (tcpdump -i eth0)
+ethtool eth0 --> NIC informations . 
+
+
+NIC BONDING -> bonding 2 nic into one (for highavailablity and redanduncy)
+
+eth0 eth1 bond0
+
+1) Install bonding drive : modprobe bonding before that check whether bonding drive is already installed (modinfo bonding)
+2) now create a new file ifcfg-bond0 in /etc/sysconfig/network-scripts/ifcfg-bond0
+ 	Add the following parameters
+DEVICE=bond0
+TYPE=Bond
+NAME=bond0
+BONDING_MASTER=yes
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=192.168.1.80
+NETMASK=255.255.255.0
+GATEWAY=192.168.1.1
+BONDING_OPTS= mode=5 miimon=100 
+
+3) now edit the first nic card to the following lines (eth0)
+
+TYPE=Ethernet
+BOOTPROTO=none
+DEVICE=eth0
+ONBOOT=yes
+HWADDR= MAC from the ifconfig command 
+MASTER=bond0
+SLAVE=yes
+
+Once done do the same thing in eth1.
+
+4) systemctl restart network
+
+cat /proc/net/bonding/bond0 --> where we can see the bonding information and the link status which is  up and which is currently running.
+
+wget -> world wide web get ( get the information from www)   also we can use curl -O
+we can use wget command to download the files or packages from internet. if the packages is not available in repository then we need to download it manually.
+In that case we need to get the package download file URL and enter the command as (wget (urlpath))
+
+
+rsync - learn 
+
+YUM Repository : /etc/yum.repos.d ( in this directory we have many repository links . we can remove it and we can create our own local repository with rpm packages inside it )once created the repo then use the command createrepo path(repopath)
+1) yum install createrepo
+2 ) Copy all packages that you want to have in your repository into one directory, such as /mnt/local_repo/
+3) createrepo --database /mnt/local_repo
+
+then yum clean all -> which will clean cache from old repository
+then yum repolist all -> which will show the no of packages inside the repo 
+yum list installed  -> show installed packages
+
+YUM - Yellowdog Updater, Modified
+yum -y install package - which will not ask for confirmation while installling the packages for dependencies
+yum -y remove package - remove the packages
+yum update mysql - updating the package
+yum search locate - ( if we dont no the exact name of the package, just type what you know it will bring up the full package name )
+yum list installed - show the installed packages
+yum list ( list the available packages in database)
+yum check-update  -( will check the updates for installaed packages)
+yum update  - will update the system packages and installed packages 
+yum --enablerepo=epel install firefox  (to install the packages from spefic repo (in this epel is a repo)
+yum update --exclude=PACKAGENAME  - While update exclluding specific package name
+yum update --exclude=kernel*  - exclude kernel related packages
+To make permanent changes, edit the /etc/yum.conf file and following entries to it: ( exclude=kernel* redhat-release* - add this line )
+
+
+RPM -> red hat package manager
+To know how many packages are install in our system we can use (rpm -qa ) q-query a- all. we can also grep it by single package name rpm -qa |grep bind
+To remove the package rpm -e package name (exact package name) and also use yum remove packagename 
+rpm -hiv packagename and path
+rpm -qi packagename (full info abt pckg) i-> information
+rpm -qc packagename(fully) will show where are the configuration of the packages are stored.
+IF we need to know about the command (pwd,wget,touch etc) which package is related to this command then use rpm -qf commandpath(/bin/touch)
+
+
+SYSTEM UPGRADE/PATCH MANAGEMENT
+
+2 types of upgrade -> major - 5,6,7  minor - 7.1,7.2,7.3
+yum updates -y --> which will do minor updates alone   we cannot do major
+
+upgarde - will delete the old package and install the new one    update -> will keep the old packages incase of any issues we can rollback it
+
+
+Telnet and ssh
+
+
+Telnet - unsecured connection between computers
+ssh -> secured
+
+If we stop the sshd then upcoming connection will not be allowed, but the previous connection will be online
+
+DNS -BIND
+
+Hostname - ip      - A record
+IP       -hostname - PTR record
+Hostname -hostname  - Cname ( If we have 50 servers for google which does not have same name for all the servers it will have different name and which will be point out to google )
+
+The config file for bind will be in /etc/named.conf  ( it will show configuration of the bind and zones that are created. find the zone name that shows in that file (named.ca (which will be in /var/named))
+We can put entries on /var/named.ca  ( once done restart the service )   systemctl restart named
+
+Nohup :   nohub test.sh &
+
+while executing the script if we use nohub then if we even close the putty the script will not close
+
+CHRONY :
+
+In /etc/chrony.conf we can mention the server ip address(which you want as a time server) once done restart the chrony systemctl restart chronyd.
+chronyc is the command name where we can get the informations. >chronyc  >sources >it will show the time servers that are mentioned 
+
+Sendmail
+
+sendmail has no d on its end. yum install sendmail once completed we have to install yum install sendmail-cf .
+/etc/mail/sendmail.mc  and sendmail-cf  we can edit the file and add the smtp server into the file. once added we have to start the service  systemctl restart sendmail
+mail -s "MAIL BODY" srinivasan@gmail.com
+and then now type the email message and onced done CTRL +D . 
+
+WEB SERVER
+
+File =/etc/httpd/conf/httpd.conf	  ( it will tell where the indexpage located or we can change it as our wish and wich port is listening)
+      /var/www/html/index.html 
+      /var/log/httpd
+install httpd service , make changes in html file, restart the httpd service and enable it.
+
+httpd -t syntex check for config file
+
+To create multiple webiste in single webserver 
+
+/etc/httpd/conf/httpd.conf   --> go to last line and type
+
+#Server2 (do the same as server 1 as flipkart.com and doccument root as /site1 (which should be created manually))
+
+<VirtualHost 192.168.1.8:80>
+ServerName snapdeal.com
+DocumentRoot "/site2"
+ServerAlias sp.com
+ErrorLog "logs/snapdeal_log"
+CustomLog "logs/snapdeal_access" combined
+</VirtualHost>
+
+<Directory /site2>
+     Require all granted
+</Directory>
+
+Once done again go to /etc/httpd/conf/httpd.conf  and in 119 line change the doccument root as / and directory as / ( check the difference between doccument root and directory)
+and then go to /etc/hosts file and type     serverip  flipkart.com    serverip  snapdeal.com 
+Once done save it and restart the httpd service and try to load the different website .
+
+In this we have configured both the website in single file httpd.conf. we can also do it in seperate way by configuring them in /etc/httpd/conf.d in this place create a file 
+as site1.conf and inside it paste the content of site1 which is mentioned in above. once done create a other file site2 and do the same.
+
+TO enable Password authentication on server :
+
+/etc/httpd/conf/httpd.conf   --> go to last line and type
+
+#Server1
+
+<VirtualHost 192.168.1.8:80>
+ServerName flipkart.com
+DocumentRoot "/site1"
+ServerAlias fk.com
+ErrorLog "logs/flipkart_log"
+CustomLog "logs/flipkart_access" combined
+</VirtualHost>
+
+<Directory /site1>
+
+AuthType     Basic
+AuthName    "This is confidential"
+AuthuserFile  /etc/httpd/htpasswd   (this file will not be there because it will create once we creating password )
+Require user  Admin   ---username
+
+</Directory>
+
+Once done and save the file. now create a user Admin  (useradd -s /sbin/nologin -M Admin) and now try to acess the website .
+now it will ask for password which we dont no . So now we have to create a password by (htpasswd -c /etc/httpd/htpasswd Admin) now it will prompt for setting password
+once done we can use the website by this username and password.
+
+To create self singed certificate  using tls - transport layer security      ssl secure socket layer older version
+
+yum install mod_ssl crypto-utils -y
+Genrate key ---> self signed and CA  (authorized by google, aws..etc)
+privatekey -- /etc/pki/tls/private/flipkart.com.key
+publickey----/etc/pki/tls/certs/flipkart.com.crt  --it will create once key generted
+
+genkey flipkart.com  ----> it will generate the key both public and private . have to complete some steps like which state which country
+once key generated we have to edit the conf file /etc/httpd/conf/httpd.conf and type before </virtualhost> 
+SSLEngine On
+SSLCertificateFile     /etc/pki/tls/certs/flipkart.com.crt
+SSLCertificateKeyFile /etc/pki/tls/private/flipkart.com.key
+and then at top change the port from 80 to 443. Then verify the syntax by httpd -t . then restart the httpd service . and also allow https in firewall firewall-cmd --add-service=https --per
+
+Http error code :
+
+3xx: Redirection
+4xx: Client Error
+5xx: Server Error
+
+400 Bad Request --->  The 400 status code, or Bad Request error, means the HTTP request that was sent to the server has invalid syntax.
+solution  :  The user s cookie that is associated with the site is corrupt. Clearing the browser s cache and cookies could solve this issue
+
+401 Unauthorized  ->  the user trying to access the resource has not been authenticated or has not been authenticated correctly. This means that the user must provide credentials to be able to view the protected resource.
+
+403 Forbidden -->  403 errors commonly occur when the user that is running the web server process does not have sufficient permissions to read the file that is being accessed.
+                   Forbidden error, means that the user made a valid request but the server is refusing to serve the request, due to a lack of permission to access the requested resource
+
+If the user is unexpectedly getting a 403 Forbidden error, ensure that it is not being caused by your .htaccess settings.
+And also if Index File Does Not Exist it will occur
+
+
+404 Not Found  -->   the user is able to communicate with the server but it is unable to locate the requested file or resource.
+Below might be the reasons:
+Did the user type in the wrong URL
+Does the server configuration have the correct document root location?
+Does the file exist in the correct location on the server? Was the resource was moved or deleted on the server?
+And permission problems.
+
+500 Internal Server Error :  This most common cause for this error is server misconfiguration and missing packages.
+
+502 Bad Gateway :Bad Gateway error, means that the server is a gateway or proxy server, and it is not receiving a valid response from the backend servers 
+503 Service Unavailable : Service Unavailable error, means that the server is overloaded or under maintenance.
+If the server is not under maintenance, this can indicate that the server does not have enough CPU or memory resources to handle all of the incoming requests, or that the web server needs to be configured to allow more users, threads, or processes.
+504 Gateway Timeout: The network connection between the servers is poor
+The backend server that is fulfilling the request is too slow, due to poor performance
+The gateway or proxy server s timeout duration is too short
+
+
+FTP AND SFTP
+
+Differences :
+
+FTP :  FTP does not offer a secure channel to transfer files between hosts.
+SFTP : SFTP offers a secure channel for transferring the files between the host.
+
+FTP : FTP is accessible anonymously, and in most cases, it is not encrypted.
+SFTP : SFTP encrypts the data before sends it to another host.
+
+FTP :  Architecture used -> Client-server
+SFTP : Architecture used -> SSH
+
+FTP :  FTP is TCP/IP protocol.
+SFTP : SFTP protocol is a part of the SSH protocol
+
+FTP :  Transfer method --> Direct transfer
+SFTP : Transfer method --> Tunneling
+
+FTP : FTP has no size limitation on single transfers
+SFTP : SFTP communication is binary and can't be logged
+
+SFTP configuration :   sftp use 22 as a port because it is using ssh for transfering the datas
+
+https://www.howtoforge.com/tutorial/how-to-setup-an-sftp-server-on-centos/
+
+
+1) mkdir -p /data/sftp --creating data and sftp folder but dont no where sftp folder is using
+   chmod 701 /data
+Create group  --> groupadd sftp
+Create user --> useradd -g sftp -d /upload -s /sbin/nologin yuvaraj    dont no why /upload is used for homedirectory
+the main Directory for the user to be in the /upload directory by setting the -d /upload command. This means that later the /upload folder will be under /data/yuvaraj/upload. -> dont understand
+Create passwrod -->passwd yuvaraj
+
+mkdir -p /data/yuvaraj/upload
+chown -R root:sftp /data/yuvaraj         permission setting 
+chown -R yuvaraj:sftp /data/yuvaraj/upload   permission setting
+
+Edit /etc/ssh/sshd_config (becarefull while choose the file )
+
+Match Group sftp
+ChrootDirectory /data/%u
+ForceCommand internal-sftp
+
+once done restart sshd
+
+Get into the other server and try to connect by sftp yuvaraj@serverip and enter the password. you will be login to it and we can fetch the datas by get command and we can also use ls command
+Doubt --> test file is in /data/yuvaraj/upload  but when we log in to sftp the working directory is /upload and while doing ls it shows the test file how?
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Centrallogger (RSYSLOG) : collect all the logs from different system that connect to this server(centrallogserver) 
+Package name : rsyslog     systemctl restart rsyslog
+Configuration file : /etc/rsyslog.com    In this we can mention the servername of IP to which we need to send the log information .(@remotehost:514)
+
+
+Systemctl -a which will show all the active and inactive services tht are in system. (running , listening)
+/etc/sshd/sshd.conf	will have all the config settings about ssh, we can enable ssh root login enable or disbale in this.  permitrootlogin no
+for globally ( even ilo)  /etc/security/access.conf   --> add the line below non-root login  " -:root:All EXCEPT LOCAL"
+
+
+firewall-cmd --> is the command where we can set the firewall settings ( firewall-cmd --help)
+iptables --list it will show the informations    /etc/sysconfig/iptables-config
+firewalld --> /etc/firewalld/firewalld.conf
+
+firewall-cmd --add-service=httpd --per | firewall-cmd --list-all  | firewall-cmd --list-all --zone=public| firewal-cmd --reload |firewall-cmd --remove-service=httpd
+
+To create a new zone :   /var/lib/firewalld/zones
+
+
+
+
+
+SELINUX - security enhanced linux (2.6 kernal) 
+
+SELINUX can change the permisson acess for process and application.'
+sestatus : will let you know about the status of selinux whether it is enabled or not. we can enable ,disable, premissive ( just warning about the file but will not do anything) /etc/sysconfig/selinux
+/etc/selinux/config   we can change the settings here
+
+semanage --> labelling
+
+
+OPENLDAP:  AD for linux
+
+To start and enable it  systemctl start slapd . config file : /etc/openldap/slapd.d where we can configure the things and also once done we have to do some changes in /etc/nsswitch to change the pass and user path to ladap.
+
+TRACEROUTE : traceroute command which will trace our route destination and list the hops(ip) where it travels. we can find where the exact issues occurs in which hop
+
+
+SYSTEM RUNLEVELS: 0-6 
+
+0 - shutdown (halt)
+1-  single user mode   we can use like init s or init S
+2-  multiusermode without NFS
+3 - multiusermode with networking (without GUI )
+4 - not defined not used
+5- multiusermode with  GUI (if gui is  not installed then it will come bck to 3)
+6- reboot
+who -r  will show which runlevel we are in
+
+BOOT PROCESS
+
+BIOS --> basic input output system. it is intermidate between software and hardware. and it will run POST power on self test which will check and initialize the hardware that required for booting process. and then it will which execute MBR (512 bytes)
+=====0]]MBR -> Master boot record which will be in the first sector of harddisk and  which execute GRUB
+GRUB -> Grand unified bootloader, it is program which start the kernal. for linux LILO and grub (both windows and linux),  Boot MGR (Windows) (/boot/grub2/grub.conf )
+Kernal ->  Core of the os which starts all the hardware and mount the 1st filesystem '/' which execute sbin/init
+init -> which execute runlevel programs
+runlevel -> runlevl programs are executed from /etc/rc.d/rc*.d/
+
+Welcome note can be edit in /etc/motd
+TO customise the welcome note by commands who is logged in kernal version linux version . we have to create a .sh file on /etc/profile.d/motd.sh
+Inside that #!/bin/bash 
+echo -e "  welcome to `hostname`  (hostname here is command which is seprated by `) 
+you are logged in as `whoami`
+
+Like this we can edit the and customise the welcome page once done this we have to edit /etc/ssh/ssh_config  before doing it take backup . GO AND FIND the printMod and type printMod no (this will help to  not go to /etc/motd)
+once done restart the service 
+
+
+STORAGE  -
+
+Local - > prebuild inside of our computer  SAN -> Storage area network : it attached to our computer through fiber cable, anything that attached to your computer through fiber cable .
+NAS : Network attached storage is anything that attached to our computer through NFS or IP   --> google it for more info
+
+
+
+
+Partition :
+
+fdisk -> shows the disk parttion  /dev/sda - 10 GB   inside /dev/sda1 ->swap   /dev/sda2 --> root
+
+adding new partition:   first add it on vmware and then come to sys and check it by fdisk -l it will show the unallocated disk thatyou aadded
+once done we have to create a partition now. so that type fdisk --> the partition name .
+once done press n  -> it will ask primary or extend  press p -> and then it will ask partition number - press 2 and then it will ask sector and then it will ask how much size we have to add 
+after everthing done press w to write . otherwise it will not reflect  all the thingss are stored in memory alone. 
+after this we have to assign the file system for the allocated disk ext2,3,4 or xfs it is latest   mkfs.xfs /dev/sdb1 
+and then now we have to mount the partition. before mounting create a folder /data and then we have to mount it on this directory
+mount /dev/sdb1/ /data  now it will be mount on this partition. to be permanent we have to edit /etc/fstab which as all the information about partition
+/dev/sdb1 (tab) /data (tab) xfs  defaults 0 0  --check the 00 what it is  once done reboot it . To unmount type umount /data (path) to mount again  mount -a  which will read it from the fstab
+first 0 --> if the value is set to 0, then the partition is excluded from taking backup and if the option is a nonzero value, the device will be backed up.
+second 0 --> That is if the value is set to zero, the device or partition will be excluded from fsck check and if it is nonzero the fsck check will be run in the order in which the value is set
+
+
+LVM (logical volume management):
+
+
+Mainly used for groping the disk into single volume group. for example if we have 2 disk which we have combined into one volume group and divided into partition.  if the 2 disk ran out of space then we can add another disk into the same volume group
+without any data loss 
+
+Createing LVM .
+
+whiled createing partiton before giving write option press 'p' . it will show partition type , we have to change the partiton type from linux to linux LVM (press t ). type linux LVM code is 8e if you want to get the code type 'L' and then press w for write
+Then we have to create pv (physical volume) -- pvcreate /dev/sdc1     pvdisplay
+now create volume group -- vgcreate oracle_vg /dev/sdc1               vgdisplay
+now create logical volume -- lvcreate -n oracle_lv --size 1g oracle_vg  lvdisplay
+make file system  --  mkfs.xfs /dev/oracle_vg/oracle_lv
+mount the logical volume as mentioned above
+
+ADDING and extending disk Using LVM   (/oracle is full, now we need to extend the partion. so we adding extra disk and attaching it to volume group and extending the partion )  PVG to show which disk is associated with volume group. 
+Add the disk through vmware and make the partion on the system , and make it as linux LVM and write it. Once done reboot it. now we going to add it on the partition which is full 
+Now we have to make it physical volume  pvcreate /dev/sdd1 and then we have to extend the vg -> vgextend oracle_vg /dev/sdd1
+now we need to extend the logical volume (which has full)  lvextend -L+1024M /dev/mapper/oracle_vg-orcle-lv(path of the partition which is full get it from df -h).
+now we need to extend the file system --> xfs_growfs /dev/mapper/oracle_vg-orcle-lv . NOW THE DISK IS EXTENDED. DONE
+
+for reduce logical voume  unmount the partition and use lvreduce and then check the file system fsck -f /dev/sdd1 and then update the file system   and then mount it 
+
+
+
+
+vgs -> show the how many vg and its size
+lvs --> shows al the logical volume
+
+ADDING OR EXTENDING SWAP SPACE. (free -m ) will show the memory and swap space
+
+Swap- virtual memory   if the Ram is full , the inactive pages in memory are moved to swap space. while swap can help machines with a small amount of 	Ram.
+IF memory is less than 2gig then the swap space will be memory*2 . If more than 2 gig then memory + 2
+To increase the swap =  dd if=/dev/zero of=/newswap(anyname) bs=1M count=1024 (which will write the new memory file to /newswap.
+Now newswap created , now -> mkswap /newswap  setting up a newswap space. now do free -m but still it is not added 
+we need to enable the swap  - swapon /newswap once done it will be added. now do it in /etc/fstab  /newswap swap(mount) swap(filesys) 0 0
+to remove newswap --> swapoff /newswap   and then rm /newswap and remove it from fstab.
+
+  
+
+RAID (redundant array of independent disks ) to make redundancy  if one disk dies other disk will be there
+Type  - Raid 0, Raid 1, raid 5
+raid 0 = 5 disk + 5 disk = 10 gig but if you loose one disk then we will have data loss
+raid 1 = 5gig disk + 5G disk = 5G disk because one is for storing and other is for replicating the datas , this will have slow process
+raid 5 = in this we have to be 3 disk  5G + 5G + 5G = 12G   . the first data will store in first disk and its information will be stored in 2nd disk , the second data will store in 2nd disk and the information will store in 3rd disk , so if we loose any disk we can retrieve the datas. 
+raid 10 = raid 0 +1
+
+File system check (fsck and xfs_repair):
+
+Fsck -f (forcefully check even the file system is clean already . and -y is used to repair the error that founded.   fsck only check (ext2,3,4 etc) this will run in boot time . xfs_repair will check the xfs file system alone and which will not run at boot time becuase it is used for large file sytem like TB so we cant wait untill it finish while bootin. 
+we have to unmount the partition and then we have to run the system check. in the case of root partition we have to go to single user mode to run in on root parttion. 
+
+xfs_repaid /dev/sdb1  before doing this we have to unmount the partion once done we have to mount it back. echo $? --> it will provide you exit code where we can find what the problem was 
+
+0 -> no erros 1 -> file system error corrected 2-> system should be rebooted. 4-> filesystem error left uncorrected etc...
+
+
+system backup(dd command) : the primary purpose of dd command is to convert and copy files
+To backup or clone the entire hardisk to other harddisk which connectd to the same system use the command dd if=(source file name) of=<targetfilename> [options]
+To copy the entire disk = dd if=/dev/sda of=/dev/sdb
+to copy the disk partion = dd if=/dev/sda1 of=/root/sda1.img
+To restoring the file to other machine. once tranfered the data to other machine extract by =  dd if=/root/sda1.img of=/dev/sdb3
+
+Network file system:
+
+Server side configuration.
+
+1) yum install nfs-utils libnfsidmap  (both packages are need to install on server side )
+2) systemctl enable rpcbind , nfs-server ( have to enable separtely )
+3) systemctl start rpcbind, nfs-server, rpc-statd, nfs-idmapd
+4) create a directory mkdir /fileshare (we can leave this step if we have already a folder that need to be shared )and give permisson to that folder.
+5) Modify /etc/exports  ( /fileshare 10.20.2.12(rw,sync,no_root_squash)   this is enabled for only one host (10.20.2.12) if we need all the server then we can put *
+   no_root_squash means client root user has full permssion like the server root user has. 
+6) once done exportfs -rv ( exporting the filesystem)
+
+
+Client side configuration : 
+
+1) yum install nfs-utils rcpcbind
+2) service start rpcbind 
+3) showmount -e 10.20.2.11(nfs server ip)  ---it will show the mount points that available in the server side.
+4) create a mount point   mkdir /mnt/sharedfolder  
+5) mount the file to client server  mount 10.20.2.11:/fileshare /mnt/sharedfolder     then df -h to show the mount point   to unmount umount /mnt/sharedfolder
+
+
+Autofs:
+
+yum install autofs -y    and start and enale autofs
+
+/etc/auto.master  and type -->   /mnt   /etc/srinivasan  
+once done create /etc/srinivasan file and enter the details --> sharedfolder(it will be created automatically)   serverip:/fileshare
+start and enale autofs
+
+
+Firewall :   install firewalld & firewall-config  ..  /usr/lib/firewalld/zones ---> all the zones(.xml) file wil be there we can create a new .xmlfile and add the services that wee needed.
+Zones -> are like profiles . we can create set of rules in each profiles
+firewall-cmd --get-zones  --> block,drop,public,internal,home,work,trusted,dmz
+
+To check which profile is currently active -->  firewall-cmd --get-default-zone
+To set the default profile  --> firewall-cmd --set-default-zone=home
+To check what are the rules that running on the profile ---> firewall-cmd --list-all --per
+to check the rules that running on other profiles --> firewall-cmd --list-all --zone=dmz  --per
+
+firewall-cmd --reload (gracefull restart)
+
+Too add the service:
+
+firewall-cmd --add-service=httpd --per  oncedone reload it
+
+
+FTP :    Yum install vsftpd ftp -y    (/var/ftp/pub) files will be stored in this place
+Start and enable vsftpd
+go to /etc/vsftpd/vsftpd.conf and edit below
+anonymous_enable=NO.  --> This will permit any one to access FTP server with authentication.
+local_enable=YES    --> allow users in /etc/passwd to login
+write_enable=YES   -->allow users to write files.  NO  will permit only to read.
+chroot_local_user=YES  --->  This will permit local user as FTP account. If you add an user, it will be treated as a FTP account as well.
+IF selinux set then use  --> #setsebool ftp_home_dir on
+firewall-cmd --add-service=ftp --per
+now we can access it through web browser  ftp://ipaddress 
+
+systemctl --type service   ---> it will list the all the service ruuning and not runnning
+systemctl --> nshow the services that started by systemd
+
+/etc/samba/smb.conf   -->samba
+
+
+GRUB file corrupted :
+
+1) insert an iso image file and go to boot menu . In that choose troubleshoot option.
+2) In the next option choose resuce option and move further. 
+3) In next option we have to choose first option (system  recovery process)
+4) Now the system will be mounted in /mnt/sysimage now we have to type chroot /mnt/sysimage . now install the bootloader in the harddisk by /sbin/grub2-install /dev/sda
+5) once done exit from it and reboot by command init 6
+
+
+/var logs?
+
+/var/log/messages  -> mail , cron , daemon, 
+/var/log/dmesg --> which has system boots up information. the information that prints when system boots up will be stored in dmesg.
+/var/log/auth.log  -->contains system authorization information.
+/var/log/boot.log -->it has a logs when system boots
+lastlog --> resent login info for all the  user
+user.log -->userlevel logs
+yum.logs --> packages that installed
+faillog-> userfailed login attempts
+
+
+password less authentication ssh:
+
+client : ssh-keygen -t rsa  --> which will create pub and private key into the user home directory .ssh/ keys will be here. once the key generated copy the pub key 
+and paste it on the other server which you need to connect by " ssh-copy-id user@192.168.43.76  This will copy the pub key from client machien and save it on the 
+otherserver user home directory .ssh/authorized_keys . once done disable the password authentication on the sshd config file. /etc/sshd/sshd_conf
+
+yum repolist  -> it will show the repository list
+
+PATCHING :
+
+1 ) we can dowload the package and make it an folder and put that in repository link .---> locally doing
+2) RHN classic subcription this is paid one. we can register with RHN directly ( rhn_register ), so we can fetch all the information and package from our repostory and install it . 
+3) redhat satellite server  --> this is proxy server for RHN , once we configured this , this will ensure to download all the packages and we can install it .. try to find more details
+4) local repository with different system 
+
+
+
+
+How to check network listening port (or ports open in linux machine)
+
+netstat -lntu(list no of tcp udp port)
+nmap -sT -O (Upper case o) hostname(enter your hostname)
+cat /etc/services |less
+
+
+
+
+
+
+
+__________________________________________________________________________________
+
+
+CDN : Content delivery network, or content distribution network.
+
+our data will be shared with our local regional Edge cache  which will distribute the content to all the edge locations.
+Two type of distribution -> web and rtmp . RTMP is used for live content distribution like streming videos. web is for static web content distribution 
+We can use the CDN service in cloudfront and confgiure the things like where the source files are there , and what are the edge loactions that we need to send our 
+datas, and we can restrict to access the datas from particular locations and we can set the time interval for caching the data from original loaction to edge locations
+ and also we can set error page in our custom way .   The user can access the datas on reginal edge cache and the link will be like wfasdfadsfada.com In this case customers 
+will not go for it. so we can use our own website name it self and then we have to redirect it to wfasdfadsfada.com this can be done in DNS by redirecting the page .
+
+DHCP : Dynamic host control protocal which is used to proive the ip address and if it is failed apipa address will be assigned to computers (169.254.0.1) to (169.254.255.255)
+DHCP will go under DORA process ( Discover,offer,request,acknowledgment)
+PORT : 67 and 68
+
+
+DHCP relay agent : This function will use when the DHCP server and the clients are in different subnets. DHCP will broadcast the ip address to clients within single network(single subnet)
+in this case we cant go for making DHCP service for all single subnet and which is not good practise. to overcome DHCP relay agent is used this will convert the 
+broadcast DHCP packets to Unicast one and which can be forward to multiple networks.
+ 
+DNS :  Domain name system 
+Round robin DNS : We can apply multiple Ip address for the single website which will share the load to mulitple requests. 1st request goes to 1st ip and 2nd goes to 2nd one ....
+DNS spoofing : Means , to decrease the time and resolve faster DNS resolver will cache the data for specific time, in this time an attacker can inject and redirect the address to different one.to avoid this we have to use ssl certificate.
+DNS resolver : DNS resolver wil be used by ISP . When we reaching to google.com DNS resolver will reach TLD ( TOP level domain) for resolving it and it caches the data if the user agian querry for the same domain , thus reducing the load on the server. 
+
+Comonly user records are : A (IPV4), AAAA (IPV6) , CNAME(canonical name ) , NS(name server ), MX (mail exchange) , PTR (pointer , reverse dns look up  ip to hostname ) , SOA ( start of authority , stores the information like  refresh rate, expiry ) etc,
+ 
+TTL : time to live which will cache the dns record for specific period of time (when ttl is expired then it should be query newly) which help to resolve faster.
+
+
+Kernal 
+
+kernal panic due to patch
+unable to mount filesystem
+
+It may also due to initrd img, because /boot folder doesnt have enough space to create initrd img.
+
+In this case we have to go to resuce mode ( in redhat 7 grub will show the resue option ) go into that mode and create the img manually. this will fix it
+To create the image we can use mkinitrd /boot/initramfs-(kernal version).img kernal version and dracut boot/initramfs-(kernal version).img kernal version.we can use mkinitrd --help for more details.
+eg : /boot/initramfs-3.10.0-327.el7.x86_64.img 3.10.0-327.el7.x86_64 
+
+To get exact kernal version uname -r  
+
+
+
+
+VMWARE:
+
+In vmware if hardware fails or the software fails it will automatically migrate  the vms to other vmware . High availablity.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_____________________________________________________________
+
+SHELL SCRIPTING
+
+#!bin/bash -> this will tell that in which the scripts are going to run .
+
+echo --> in between two sentence if we need line we can put echo which will give space and gives the output for the next line.
+$ --> used to call the variable  (a=srinivasan    echo "my name is $a" ) 
+clear --> it will clear all the content on the screen before executing scripts.
+_________________________________________________________________----
+If-then Script:
+
+count=100
+if  [ $count -eq 100]                                                               if [ -e /home/srini/testing]  --> this will check whether the file exit or not
+then
+   echo count is equal to 100
+else
+   echo  count is not equal to 100
+fi    ---> if else statement is done
+
+_____________________________________________________________
+For loop  ---> it will repeat the task again and again untill the loop ends. 
+
+for i in 1 2 3 4 5
+do 
+echo print $i
+done
+__________________________________________________________________________
+Do while  --> will keep running the loop until certain condition is met.
+
+Script to run for a number of times
+
+#!/bin/bash
+
+c=1
+while [ $c -le 5 ]
+do
+        echo "Welcone $c times"
+        (( c++ ))
+done
+-------------------------------------------------
+Script to run for a number of seconds
+
+#!/bin/bash
+
+count=0
+num=10
+while [ $count -lt 10 ]
+do
+        echo
+        echo $num seconds left to stop this process $1
+        echo
+        sleep 1
+
+num=`expr $num - 1`
+count=`expr $count + 1`
+done
+echo
+echo $1 process is stopped!!!
+echo
+_________________________________________________________________
+
+case Scripts:
+
+
+#!/bin/bash
+
+echo
+echo Please chose one of the options below
+echo
+echo 'a = Display Date and Time'
+echo 'b = List file and directories'
+echo 'c = List users logged in'
+echo 'd = Check System uptime'
+echo
+
+        read choices
+
+        case $choices in
+
+a) date;;
+b) ls;;
+c) who;;
+d) uptime;;
+*) echo Invalid choice - Bye.
+
+                esac
+
+_________________________________________________________________________________
+
+
+
+awk  --  used to filter the datas like column wise or row wise like that.
+awk '{print $2}' test.txt ... in this it will look up the test.txt and print the 2 column 
+awk 'NR==1 {print}' test.txt    this will print the first row in the file                              eg : 1 mahendran  -----------this is first rowx
+awk 'NR==1 {print $2}' test.txt   thiw will print the first row and the second cloumn alone            eg :  mahendran
+
+IF the line contains like below
+
+1,mahendran,devops
+2,dhoni,devops
+
+now we can seperate this because , is there . SO we need to seperate using ","  so that we can seprate by column
+awk  -F "," '{print $2}' test.txt   now it will print the second column alone   --- INt his we using -F for seperating the line by delimetry ","
+
+
+Text.txt file contains
+
+cyber admin 1 100
+tamil moderator 2 200
+tamilspy moderator 3 300
+tamilhack moderator 4 400
+
+awk '/admin/ {print}' text.txt   -- this will grep all the line which has admin and print it
+cyber admin 1 100
+
+
+awk '/admin/ {print $2}' text.txt  -- this will grep all the line which has admin and print the 2 column alone
+admin
+
+awk '/^t/ {print $1}' text.txt    --- This will print whatever line strart with t and the first column
+
+tamil
+tamilspy
+tamilhack
+
+awk '$1 !~ /^t/ {print $1}' text.txt   ----- $1 first line !~ --- not equal to /^t/   --- it will check what are the lines are not starting with t and print the first column
+
+cyber
+
+&**************************************************
+
+NR -- no of records --- means row
+
+awk '/moderator/ {print NR,$1}' text.txt
+
+2 tamil
+3 tamilspy
+4 tamilhack  
+
+this is printing the row number and the first column of modrator
+
+
+OFS -- output fied sepration, eg below
+
+
+awk '/^t/ {print $1,$2}' text.txt 
+
+tamil moderator
+tamilspy moderator
+tamilhack moderator
+
+This will prinnt the first coulumn and second column , it will put space between first and second column defaultly,  if we waant something else rather than space means we can mention in OFS so that it will seperate in that way
+
+awk 'OFS="|" /^t/ {print $1,$2}' text.txt    -- now it will sperate by |
+
+tamil|moderator
+tamilspy|moderator
+tamilhack|moderator
+
+
+############################################################################################################################
+
+set -x  this will enable debug mode   ( it will print the command also with the output)
+set -e  if any line is wrong in script it will stop executing the next step in the script. 
+set -o pipefail  ( while doing pipe in that anything worng it will stop executing the script ,  if pipe fails the above seet -e wont work that y we using this comand )
+
+print only s or number of s in missisip
+
+x=missisip
+grep -o "s" <<<"$x" | wc -l    -- no of cout
+
+#########################################################################################
+Script Valaxy technology:
+################################################################################
+echo concepts -- 4th video
+
+echo hi -- it will display hi , even with single quotes and dobule quotes it will going to display the same output. 
+
+
+echo '$(ls)'
+$ls   ---- it will display whatever that is insidde ' '
+
+echo "$(ls)"  
+File1
+file2
+
+echo $ls
+file1 file2
+
+Above are the difference we get while using quotes
+
+______________________________________________________________
+Variables  - 5th video
+
+x=5          (we should not leave space between x = 5 . always its should be x=s only not any space.
+echo "$(x)"
+echo "$(y)"
+y=10
+echo "$(y)"
+
+output will be
+5
+      here the value will bbe empty space because we didnt specify the value  for y here, after that only we specified the value y
+10
+
+_______________
+to comment multiple value .instead of using # we can do this in this way
+
+<< anyletter  (we can give any name or something but is should be same in the ending also )
+content of the scripts
+--
+--
+
+anyletter 	
+
+-------------------------------------------
+echo " the value of x is $x  the value of y is $y  the value of z is $z "
+
+output : the value of x is 45 the value of y is 45 the value of z is 45 
+
+but in this we want this is seprate line not in single line for this we will use echo -e
+
+echo -e "the value of x is $x \nthe value of y is $y  \nthe value of z is $z"
+now the output will be in single lines
+the value of x is 45
+the value of y is 45
+the value of z is 45
+
+so we have to use \n for starting with new line
+
+___________________________________________________________________________________________________________--
+echo $? which will show whether the previous command output is succesfull or failure
+
+if its successfull it will show 0  if its failure it will show 1 or any number
+
+
+echo string/text/message
+echo $variable
+echo $(command)
+
+and also we can give all these combined also
+
+echo string/$variabe/$(command)
+
+In echo we use two option one is echo -n and echo  -e
+
+echo -n  ->  whenever we use this the next line will be continue once the output is displayed
+
+eg:
+
+echo -n "my name"
+echo "my location"
+
+output will be
+
+my namemy location --> once your output is came the next output will be proceed from that line itself
+
+echo -e  --> in this we have previously seen \n option for this. \n is for next line
+
+and also we have various options like \t - for tab space \b  and \r and \v    \v will print the line in vertical way eg below
+hi my name 
+           is srinivasan
+                         thanks for comming
+
+like this it will print.  all these option can be used in echo -e ... and also for colour font also we can use echo -e with colour code. check google for it .
+
+
+using read command checking the status of the service:
+
+read -p " Enter the service name" " web_server
+status=$(systemctl stats $web_server |awk 'NR==3 {print $2}')
+echo -e " the current status of $web_server is $status"
+
+**************************************************
+
+Getting input and addition the value
+
+read -p "enter the value a: " a
+read -p "enter the value b: " b
+result=expr "$a + $b" |bc 
+echo "The addition of $a and $b is: $result"
+
+or we can give the input while executing the script with adding parameters for we can use the below script
+
+a=$1    - which will get the first parameter
+b=$2    - which will get the second parameter
+result=expr "$a + $b" |bc 
+echo "The addition of $a and $b is: $result"
+
+***********************************************
+if we didnt pass the value in the paramenters we will get the result as 0. but that is not correct only if 2 numbers provideed while executing the script then only it should work otherwise it should be empty. we can use the below script
+
+#!/bin/bash
+cmdlineargument=$# (IN THIS $# is specifing how many parmeter we giving while executing the script,if we passing 2 paramenter then it will be 2)
+if [cmdlineargument -eq 2]  -- so if the parameter that we passing should be 2 values otherwise script will not execute 
+then
+a=$1    - which will get the first parameter
+b=$2    - which will get the second parameter
+result=expr "$a + $b" |bc               (or we can also give like this)  result=$((x+y))
+echo "The addition of $a and $b is: $result"
+fi
+***************************************************
+echo "enter start or stop to perform the action on httpd service: " action
+if [ "${action}" == "start" ]
+then
+echo "starting the service"
+sudo systemctl start httpd
+echo "started"
+fi
+
+if [  "${action}" == "stop" ]
+then
+echo "stopping the service"
+sudo systemctl stop httpd
+echo "stopped"
+fi
+*************************************
+Diplay the welcome to shell script message to times
+
+for i in $(seq 1 10)     -- normally when wee type in terminal seq 1 10 it will disply the result, so calling them in script we using $(command)
+do
+echo "welcome to shell script"
+done
+
+there are different type of loop   for , while, until , select
+*****************
+seq start end   or seq start step end
+echo {start..end}    eg: echo {1..10} it will print 1 to 10
+echo (start..end..step}  step is nothing but difference that we need   eg: echo{1..10..2} with diff 2 it will pring 
+
+
+
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+OOO
+tm abt
+stud
+kernal panic
+Vpc
+ports
+initramfs diff initrd image
+primary and extended partition
+Extract tar   tar -xvf
+
+
+
+
+
+https://linoxide.com/linux-command/awk-linux-famous-oneliners/
+https://www.golinuxhub.com/2018/06/scenario-based-interview-question-beginner-experience-linux.html
+
+
+
+
+inodes  : it is metadata "“data” about the data" . Metadata consist of information about the data. More precisely it includes information such as the Access Control List (ACL), the date the file was modified, file owner, file permissions, size of file, device ID, uid of the file, etc
+The inode space is used to track the files stored on the hard disk.
+Each entry is 128 bytes in size
+
+List and mount devices in linx
+
+df  -aTh
+findmnt
+cat /proc/self/mounts
+mount -l
+
+________________________________________________________
+CRON entry
+* * * * * *
+| | | | | |
+| | | | | +-- Year (range: 1900-3000)
+| | | | +---- Day of the Week (range: 1-7, 1 standing for Monday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month (range: 1-31)
+| +---------- Hour (range: 0-23)
++------------ Minute (range: 0-59)
+
+_______________________________________________________________________
+How to add binary to $PATH variable?
+
+* export PATH=$PATH:/path/to/the/binary/file
+
+* ulimit : that can set or report(display) the resource limit of the current user.
+
+* ulimit -a  ->This will print all the resource limits for the current user.
+
+* The system resources are defined in a configuration file located at “/etc/security/limits.conf”. “ulimit”, when called, will report these values.
+
+____________________________________________________________
+SSH log related files : /var/log/sshd
+
+____________________________________________________________
+If a user is locked due to failed attempts then we need to reset the account
+# faillock --reset --user deepak
+# pam_tally2 --reset --user deepak
+
+___________________________________________________________________________
+process states in Linux
+
+Running, waiting, stopped and Zombie.
+
+______________________________________________________
+
+lsof command : lsof is a command line utility which is used to list the information about the files that are opened by various processes.
+______________________________________________________________
+
+whether a user account is locked or not?
+
+passwd -S username
+
+passwd -u username --> unlock 
+
+___________________________________________________
+Change the runlevel:
+
+To change the edit level /etc/inittlab and edit the initdefault entry
+
+_____________________________________________________________________
+
+
+To change the default Target (default system runlevel, for the next reboot), use systemctl set-default TARGET:
+
+systemctl set-default multi-user.target
+systemctl set-default graphical.target
+
+________________________________________________________________
+
+Sort by Memory/Cpu/Process ID/Running Time
+To find the process consuming the most cpu or memory, simply sort the list.
+
+Press M key ( yes, in capital, not small ) to sort the process list by memory usage. Processes using the most memory are shown first and rest in order.
+
+Here are other options to sort by CPU usage, Process ID and Running Time -
+
+Press 'P' - to sort the process list by cpu usage.
+Press 'N' - to sort the list by process id
+Press 'T' - to sort by the running time.
+____________________________________________________
+
+Soft link --> file1 created and link created (file1link) 
+if any changes made in link file orginal file updated as well
+even we change the filelink name  the link will not broke
+if original file removed , link file will be useless and no data will be there in link file
+
+Hard link -> same as soft link , but we cant create it for directory and if orginal file removed then link file will have the content ( it will not lose data) . 
+
++_-______________________________________________________________________________
+
+root ALL=(ALL:ALL) ALL - This applies to user root 1
+root ALL=(ALL:ALL) ALL - This rule applies to all user root logged in from all hosts 2
+root ALL=(ALL:ALL) ALL - User root can run commands as all users 3
+root ALL=(ALL:ALL) ALL - User root can run commands as all groups 4
+root ALL=(ALL:ALL) ALL - These rules apply to all commands 5
+
+_____________________________________________
+
+find (path) -name (filename)
+locate filename
+
+______________________________
+
+
+
+
+SMTP          25
+FTP             20 for data transfer and 21 for Connection established
+DNS            53
+DHCP         67/UDP(for DHCP server, 68/UDPfor DHCP client
+SSH            22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
