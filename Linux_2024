@@ -311,6 +311,8 @@ groupadd joe  (/etc/group)  group related password availbe in /etc/gshadow
 groupadd -g 50000 joe ( changing group id)
 groupmod -g 5000 joe ------ groupmod -n joe newname  (chaning grp name)  gpasswd -M arjun,joe  groupname
 
+groups Srini  --> which will display what are the groups Srini (user) have
+
 gpasswd -d tom groupname  ( removing user)
 
 getent passwd tom ( particular user information from passwd file)
@@ -331,6 +333,17 @@ LOCKING BY PASSWORD
 
 passwd -l tom (lock)    Then in shadow file you will see "!!" 
 
+
+passwd -S <username>   -- can check whether the user is locked or not 
+
+Srini(user) L 08/15/2025 0 99999 7 -1
+
+L → Locked
+P → Password set (active)
+NP → No password set
+
+
+
 passwd -u tom     (unlok)
 
 passwd -S <username> --- will show user is locked or unlocked.
@@ -348,9 +361,16 @@ su - tom  -> home directory will be in tom
 
 tom ALL=(ALL)      ALL
 
-1st ALL -> All terminals he can use sudo command
+1st ALL -> In any host user(Srini) can use the sudo . like server1,server2. any host. if you want any  specific host we can mention server1 only (not all).
+
+2nd ALL  -> we can login as any user. normally we dont have permission to switch to any user. but in this ALL we can login to any user by "sudo -u Jenkins" it will ask for password in that we have to give our password for authentication. and then we can run the related commands that we needed. if you dont want to enter the password we can set it in sudo file "ALL NOPASSWD'
+
+how this is used. Lets say only Jenkins user has permission to restart the service. normal user dont have the permission to restart. in that case we can switch to the user and restart the service. whatever the Jenkins user have the permission we can use that permission. 
+
+If you dont want to give permission for all user then we can use like this   ALL=(Jenkins,apache) ALL  instead of using this ALL=ALL ALL.   so only we can switch to Jenkins and apache not any other user. and also in log it will show whatever command we run by login to other user it will cleary show that the command runs by Srini using Jenkins account. so logs will be traced and no wrong action can be done using other account. 
+
+
 3rd ALL -> on all commands he can execute
-2nd ALL  -> execute sudo commands on anywhere or anyuser
 
 OR else you can add the user to group wheel 
 
@@ -1715,55 +1735,7 @@ DHCP         67/UDP(for DHCP server, 68/UDPfor DHCP client
 SSH            22
 
 
-
-
-
-
-#####################################################################################################################
-
-Step	                              Description
-1️⃣ Identify Patches	            Security team lists required patches.
-2️⃣ Create PTASK (Ticketing System)	    PTASK created in ServiceNow/Jira with approvals. ( in the ptask , we will mention what are the packages, what are the servers and env)
-3️⃣ Get Approval	                    Business, application, and production support team, Linux team  approve patching.
-4️⃣ Take Backup	                    VM snapshots, database backups are taken.
-5️⃣ Stop Services	                    Application team stops services before patching.
-6️⃣ Deploy Patches Using Ansible	        Ansible playbook runs, applying patches.
-7️⃣ Reboot If Needed	                Servers rebooted if kernel updates were applied.
-8️⃣ Start Services	                    Application services restarted after patching.
-9️⃣ Validate & Monitor	                Check application health, logs, and services.
-🔟 Rollback If Required	            If issues arise, restore from backup or downgrade patches.
-
-
-💬 How to Answer in an Interview
-💬 "Yes, I have worked on patching activities. The process we follow is:"
-1️⃣ We first identify patches from vendor sources (Red Hat Satellite, WSUS for Windows).
-2️⃣ A PTASK is created in ServiceNow/Jira with approvals from business and application owners.
-3️⃣ We take full backups (VM snapshots, database backups).
-4️⃣ Before patching, the application team stops services like Tomcat, Nginx, and Redis.
-5️⃣ Using Ansible, we push patches to 100s of servers.
-6️⃣ Post-patching, we restart services and validate logs, application performance.
-7️⃣ If any issue occurs, we rollback using snapshots or the previous kernel.
-
-
-
-Largest files in a folder	`du -ah /path/to/folder   ----   du -ah /var/log | sort -rh | head -10
-Largest files in entire system	`find / -type f -exec du -h {} +   ----find / -type f -exec du -h {} + | sort -rh | head -10
-Largest files without folders	`find /path/to/folder -type f -exec ls -lh {} +
-
-
-  redhat ----> redhat satilite (our server ) ----> from there 4 yum server , dev, prod, stage kind of  . from there the repo link will be configured with all the servers.
-
- "In our environment, Red Hat Satellite acts as the central patching server, syncing updates from Red Hat. These patches are distributed to internal YUM repositories, categorized by environments like Dev, Stage, and Prod. Each client server is configured to fetch updates from its respective repo. We automate the patching process using Ansible, where servers pull updates in a rolling manner, ensuring minimal downtime."
-
-
-Our Red Hat Satellite Server syncs packages from Red Hat, and each YUM server in different data centers pulls updates from the Satellite. In our setup, the YUM servers fully store the packages locally so that all client servers can quickly install updates without depending on the Satellite. This ensures high availability and faster patching. However, in some cases, organizations use a proxy model where the YUM server fetches packages from Satellite only when requested, reducing storage requirements."
-
-✔ This explanation shows your deep understanding of how patching works!
-
-
-satellite-sync --channel=rhel-x86_64-server-7   --- from red hat to satellite server
-reposync --repoid=rhel-7-server-rpms --download_path=/var/www/html/repos/   --- from satellite server to yum server
-yum install httpd -y      from yum server to server
+############################################################################
 
 
 
@@ -1774,48 +1746,6 @@ yum install httpd -y      from yum server to server
 
 
 
-For AWS patching, we can either deploy a Red Hat Satellite Server inside AWS, which allows us to control patching similar to on-prem, or use AWS Systems Manager (SSM) Patch Manager, which automates patching in a fully managed way. If an organization has a hybrid setup (both on-prem and AWS), Satellite is the better option. However, for fully cloud-native environments, AWS SSM is the preferred approach as it simplifies patching without the need for dedicated servers."
-
-
-
-🔹 How SSM Patching Works (Simple Explanation)
-1️⃣ AWS SSM Agent runs on EC2 instances and reports their patch status to AWS.
-2️⃣ AWS SSM Patch Manager checks for missing updates based on the configured Patch Baseline.
-3️⃣ AWS SSM Maintenance Window schedules the patching at the defined time.
-4️⃣ EC2 instances get patches directly from AWS repositories (no need for Satellite or Capsule).
-5️⃣ After patching, SSM logs the patching details for tracking and compliance.
-
-✔ With AWS SSM, patching is fully automated and doesn't require Satellite or Capsule!
-
-
-
-
-🔹 Real-Time Flow of Ansible + AWS SSM Patching
-✅ Step 1: SSM syncs patches from Red Hat automatically.
-✅ Step 2: EC2 instances are already configured with SSM.
-✅ Step 3: We run the Ansible playbook, which triggers patching.
-✅ Step 4: EC2 instances fetch patches from AWS SSM and install them.
-✅ Step 5: If a reboot is required, we can control it with Ansible.
-
-
-
-
-🔹 1️⃣ Creating a Custom Patch Baseline
-You can create a Custom Patch Baseline to:
-✔ Approve only specific patches.
-✔ Exclude unwanted patches.
-✔ Set compliance rules (e.g., auto-approve security patches only).
-
-🔹 Steps to Create a Custom Patch Baseline in AWS Console
-1️⃣ Go to AWS SSM Console → Patch Manager → Patch Baselines.
-2️⃣ Click Create Patch Baseline.
-3️⃣ Select the OS (Amazon Linux, RHEL, Ubuntu, etc.).
-4️⃣ Under Approval Rules, define:
-
-Auto-approve Security Patches only
-Exclude Specific Patches (Blacklisting)
-Approve Patches Manually (Whitelisting)
-5️⃣ Save the Baseline.
 
 
 
