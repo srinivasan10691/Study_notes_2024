@@ -370,7 +370,9 @@ how this is used. Lets say only Jenkins user has permission to restart the servi
 If you dont want to give permission for all user then we can use like this   ALL=(Jenkins,apache) ALL  instead of using this ALL=ALL ALL.   so only we can switch to Jenkins and apache not any other user. and also in log it will show whatever command we run by login to other user it will cleary show that the command runs by Srini using Jenkins account. so logs will be traced and no wrong action can be done using other account. 
 
 
-3rd ALL -> on all commands he can execute
+3rd ALL -> on all commands he can execute, or elease we can give any specific command that needed.
+
+
 
 OR else you can add the user to group wheel 
 
@@ -420,8 +422,8 @@ ls -l | tee file1 file2  -> which will show the output and also the save the out
 more --> is the command which gives the ouput one page at a time( for next page we have to enter spc)
 tail  --> ls -l |tail -1   last line
 less --> same as more command, but if we press "j" it will move one by one line also we can use up arrows
-head --> head -2 filename --> we will see the first 2 lines
-tail  --> tail -2 filename -->last 2 lines
+head --> head -n 2 filename --> we will see the first 2 lines
+tail  --> tail -n 2 filename -->last 2 lines
 
 cut   ----> cut -c1 filename(where you need to cut the words) > filename( to the save the content)
             cut -c1-2 filename (first 2 words)
@@ -449,6 +451,16 @@ diff filename filename1
 cmp  ---> shows which line is different ( cmp filename filename1  )
 
 tar  ---> just to zip the files it will not compress
+
+
+For extract below commands. these files compressed and zipped and we are extracting using the below command.  so for compressing the command will be changed, just use c instead of x in the below commnnds
+
+ tar	                   tar xvf file.tar	       (no extra)
+.tar.gz / .tgz	           tar xvzf file.tar.gz    	z = gzip
+.tar.bz2	           tar xvjf file.tar.bz2	j = bzip2
+.tar.xz	                   tar xvJf file.tar.xz 	J = xz
+
+
 gzip  --> it will zip the file
 
 tar cvf testing.tar files(which need to be zipped)
@@ -466,6 +478,25 @@ sed ----> sed 's/find/replace/g' filename  (g is for all words).  this only chan
           sed -i '/delete/d' filename-> delete the word 	     sed '/^$/d' filename -----> which will remove the empty lines in the file
           sed '1d' filename (or) sed '1,2d' file name ---> which will remove the 1st line and second line  sed 's/\t/ /g' filename --> replace tabspace with space
           to use sed command directly on vi editor is  %s/find/replace/ --> it will change it in vi itself.
+
+
+sed -i 's/test//g' filename  -- this will remove the word test in the file completely
+sed -i '/test/d' filename  -- this will delete the line itself. whichever line has the test word it will remove that line completely
+sed -i  '8!s/find/replace/g' filename   -- 8th line will not change all the other line will be change 
+sed -i  's/\t/ /g' filename --> replace tabspace with space
+
+
+If you want to remove just the character a → use 's/a//g'  
+If you want to remove the whole line containing a → use '/a/d'
+
+If you want to remove the full word containing a → use 's/\w*a\w*//g'	
+
+\w* → "zero or more word characters" (letters, numbers, underscore).
+a → the letter a itself.
+\w* → again, "zero or more word characters".
+
+
+
 
 sudo su  -> root or (sudo - )
 sudo - username
@@ -495,6 +526,31 @@ uname -a - the hostname, kernal version and the time it was built.
 which - this is will show the path of the command that is located .    which pwd, which hostname
 cal - calender of current month.  cal 9 1977  it will show the month calender
 bc - calculater
+
+
+uname -r      ( but this one is the kernel version showing )
+Kernel release
+5.15.0-78-generic
+
+ 
+uname -v   ( this one will show when kernel version is build and other things)  so if you want kernel version you should go with uname -r
+Kernel version
+#85-Ubuntu SMP Tue Jul 11 14:17:20 UTC 2023
+
+
+uname -n
+Node name (hostname)
+server01
+
+uname -a
+All information together
+Linux server01 5.15.0-78-generic #85-Ubuntu SMP Tue Jul 11 14:17:20 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+
+uname -o
+Operating system
+GNU/Linux
+
+
 
 ps - will shw what are all the process is running in system     ps -ef |grep ntpd  (show the process) user , pid ,ppid, time and cmd
 
@@ -545,6 +601,21 @@ free -> shows the memory and swap usages
 sar --> shows the CPU usage
 vmstat -> virtual memory statics
 
+
+  
+
+netstat -tulnp --All TCP/UDP listening ports with process   
+
+t- tcp u -udp l-listening  n-numeric p-process
+
+netstat -lnp  - Check listening ports only
+
+netstat -rn  - Check routes
+
+netstat -a  - Show all listening and non-listening sockets
+
+
+
 LOGS
 boot logs store the booting logs
 Secure logs contain the user login and authentication fail details on that logs . tail -f secure will shows the currently updating logs too.
@@ -574,6 +645,29 @@ update selinux by the below command
 touch /.autorelabel
 and then reboot it by the command reboot
 
+
+As per chatgpt
+
+
+1 Reboot the system -  When you see the GRUB menu during boot, press e to edit the boot parameters.
+
+2 Edit boot entry - Find the line starting with linux or linux16.
+At the end of that line, add:   rw init=/bin/bash  (This tells the system to boot directly into a bash shell with root privileges.)
+once done ctrl +X for f10
+
+Now we will get into root shell and type passwd and enter the new root password to change
+touch /.autorelabel --- if selinux is enabled.   
+
+finally reboot the system  -- reboot -f  
+
+
+*******************************************
+
+sudo chroot /mnt/rescue   
+
+You are telling Linux:
+“From now on, treat /mnt/rescue as if it is the root filesystem (/) of the machine.”
+*************************************************
 
 EXCUTED ON REDHAT
 
@@ -953,10 +1047,10 @@ SYSTEM RUNLEVELS: 0-6
 
 0 - shutdown (halt)
 1-  single user mode   we can use like init s or init S
-2-  multiusermode without NFS
+2-  multiusermode without networking
 3 - multiusermode with networking (without GUI )
 4 - not defined not used
-5- multiusermode with  GUI (if gui is  not installed then it will come bck to 3)
+5- multiusermode with networking and  GUI (if gui is  not installed then it will come bck to 3)
 6- reboot
 who -r  will show which runlevel we are in
 
@@ -1077,6 +1171,20 @@ Server side configuration.
 5) Modify /etc/exports  ( /fileshare 10.20.2.12(rw,sync,no_root_squash)   this is enabled for only one host (10.20.2.12) if we need all the server then we can put *
    no_root_squash means client root user has full permssion like the server root user has. 
 6) once done exportfs -rv ( exporting the filesystem)
+
+
+What is root_squash?
+
+By default, NFS “squashes” the root user on the client.
+That means:
+If a client accesses the NFS share as root, NFS maps it to nobody user on the server
+This is a security measure to prevent client root from having root access to server files.
+
+What is no_root_squash?
+
+no_root_squash disables root squashing.
+Meaning: root on the client acts as root on the NFS server.
+Use this carefully because it gives full access to the server files to the client root use
 
 
 Client side configuration : 
