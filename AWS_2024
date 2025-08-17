@@ -1587,7 +1587,7 @@ But actually 👉 they are not options They are business requirements / SLAs (Se
 
 RPO = 0 (no data loss allowed)  if it is 5 then minimum 5 min data can be loose , which we have an sla agremment with client
 
-RTO = 1 minute (system must recover in 1 min)  . within 1 min the sytem should recover after failover  this is also kind of sla agreement
+RTO = 1 minute (system must recover in 1 min).. if db fails it should recover in one min
 
 
 
