@@ -1515,6 +1515,13 @@ While creating the RDS , we can choose the automatic backup option for a specifi
 What is point in time restore point?
 lets say we set up back up on morning 6am on each day, and automatic backup will take the backup and the specific time as mentioned. but our server crashed on 10am morning and we have lost 4 hours of data.  but that is not the case just choose our RDS DB and click action and there will be option called point in time restore. choose that option and it will show options 1" restore to latest restorepoint 2" restore to custom time . in the first option we can see below there will be time of the latest restore point . in our case it will be 9.55am  so there is only 5 mins of data only not available. so we can get the latest restore point in this option and we can restore it . this will automatically enabled when we enabled the automatic back. 
 
+For RDS (MySQL/Postgres/Oracle/SQL Server/MariaDB)
+When you enable automated backups, AWS:
+Takes one daily snapshot during your backup window (e.g., 6 AM).
+Continuously backs up transaction logs to S3 — usually every 5 minutes.
+This is default behavior when automated backups are turned on (you don’t need to configure 5-min backups separately).
+That’s what enables Point-in-Time Restore (PITR).
+
 Restore means it will not be restored in the same db where it failed. It will create a another copy of db and then it will restore the data. so we will get a new db and we have to point our application to our new db endpoint. while restoreing itself we can choose different instance type and other option for creating the new db.  all about is restore is nothing but creating the newdb with our old data . it will not be restored in the same db where its failed.
 
 so lets say our application is pointing to db1 which is failed and we created a db2 with the restore option. so for db2 there will be different endpoint. so one option we can change the end pint in the applicaton level. or just the change the db1 -> db1_old and change the db2 -> db1  once you change the name of the db , the endpoint wil also be changed as same as db1. mostly endpoint will be starting in dbname_somevalue.  the somevalue will not change it will be same for all the db. so if we change the dbname alone it will be enough so that we can get our db1 endpoint to db2. and no need to change that in the application end. 
